@@ -1,0 +1,20 @@
+{
+    "puerto":8080,
+    "drives":[
+        {
+        "nombre":"prueba",
+        "owner":"Brandon",
+        "archivos":[{
+            "nombre":"prueba.txt",
+            "fecha":""
+            }],
+        "carpetas":[{
+            "nombre":"prueba",            
+            "archivos":[{
+                "nombre":"prueba2.txt",
+                "fecha":""
+                }],
+            "carpetas":[]}]
+    }],
+    "usuarios":[]
+}

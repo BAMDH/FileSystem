@@ -1,0 +1,10 @@
+{
+  "puerto" : 9090,
+  "drives" : [ {
+    "nombre" : "nuevo_drive",
+    "owner" : "Nuevo Usuario",
+    "archivos" : [ ],
+    "carpetas" : [ ]
+  } ],
+  "usuarios" : null
+}
