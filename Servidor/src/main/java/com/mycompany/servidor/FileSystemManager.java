@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class FileSystemManager {
@@ -37,9 +38,7 @@ public class FileSystemManager {
             }
         } catch (IOException e) {
             System.err.println("Error al cargar el filesystem: " + e.getMessage());
-            // Puedes inicializar con valores por defecto en caso de error
-            fileSystem = new FileSystem();
-            fileSystem.setPuerto(8080);
+       
         }
     }
 
@@ -57,13 +56,32 @@ public class FileSystemManager {
         return fileSystem;
     }
 
+    private Carpeta obtenerCarpetaPorRuta(Drive drive, String[] rutaPartes, int indice) {
+    Carpeta actual = null;
+
+    for (int i = 1; i < rutaPartes.length; i++) {
+        String nombreCarpeta = rutaPartes[i];
+        actual = null;//si se vuelve a llegar es porque no la encontro
+        actual = drive.getCarpeta(nombreCarpeta);//busca la carpeta
+        if (actual == null) return null;//falla la busqueda
+    }
+    return actual;
+    }
  
     public void addDrive(Drive drive) {
         if (fileSystem.getDrives() == null) {
             fileSystem.setDrives(new ArrayList<>());
         }
         fileSystem.getDrives().add(drive);
-        saveFileSystem(); // Guarda después de modificar
+        saveFileSystem(); 
+    }
+    public void addArchivo(Archivo archivo, String nombreDrive) {
+        fileSystem.getDrive(nombreDrive).getArchivos().add(archivo);
+        saveFileSystem(); 
+    }
+    public void addCarpeta(Carpeta carpeta, String nombreDrive) {
+        fileSystem.getDrive(nombreDrive).getCarpetas().add(carpeta);
+        saveFileSystem(); 
     }
 
 }

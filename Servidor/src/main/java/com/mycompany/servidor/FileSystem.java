@@ -21,6 +21,16 @@ public class FileSystem {
     public List<Drive> getDrives() { return drives; }
     public void setDrives(List<Drive> drives) { this.drives = drives; }
     
+    public Drive getDrive(String nombreDrive) {
+    for (Drive drive : drives) {
+        if (drive.getNombre().equalsIgnoreCase(nombreDrive)) {
+            return drive;
+        }
+    }
+    
+    return null; // No encontrado
+}
+    
     public List<Usuario> getUsuarios() { return usuarios; }
     public void setUsuarios(List<Usuario> usuarios) { this.usuarios = usuarios; }
 }

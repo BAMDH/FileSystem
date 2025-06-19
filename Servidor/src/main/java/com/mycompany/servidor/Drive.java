@@ -18,6 +18,14 @@ public class Drive {
     private List<Archivo> archivos= new ArrayList<>();
     private List<Carpeta> carpetas= new ArrayList<>();
 
+    public Drive(String nombre, String owner) {
+        this.nombre = nombre;
+        this.owner = owner;
+    }
+
+    public Drive() {
+    }
+
     // Getters y Setters
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
@@ -27,6 +35,16 @@ public class Drive {
     
     public List<Archivo> getArchivos() { return archivos; }
     public void setArchivos(List<Archivo> archivos) { this.archivos = archivos; }
+    
+    public Carpeta getCarpeta(String nombreDrive) {
+        for (Carpeta carpeta : carpetas) {
+            if (carpeta.getNombre().equalsIgnoreCase(nombreDrive)) {
+                return carpeta;
+            }
+        }
+        return null;
+    }
+
     
     public List<Carpeta> getCarpetas() { return carpetas; }
     public void setCarpetas(List<Carpeta> carpetas) { this.carpetas = carpetas; }
