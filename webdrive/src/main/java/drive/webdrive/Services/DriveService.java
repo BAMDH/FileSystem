@@ -31,6 +31,7 @@ public class DriveService {
             RestTemplate restTemplate = new RestTemplate();
             String url = SERVER_URL + "/api/usuario/" + nombre;
             UsuarioData usuario = restTemplate.getForObject(url, UsuarioData.class);
+          //  System.out.print(usuario.getNombre());
             return usuario;
         } catch (Exception e) {
             e.printStackTrace();
