@@ -1,0 +1,91 @@
+
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mi WebDrive</title>
+    <link rel="stylesheet" th:href="@{/css/drive.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<!-- Barra superior -->
+<header class="header">
+    <h1>Mi WebDrive</h1>
+    <div class="user-info">
+        <span th:text="${usuario}">Usuario</span>
+        <button onclick="logout()">Salir</button>
+    </div>
+</header>
+
+<!-- Contenedor general -->
+<div class="container">
+
+    <!-- Barra lateral -->
+    <aside class="sidebar">
+        <button onclick="crearArchivo()">+ Archivo</button>
+        <button onclick="crearDirectorio()">+ Carpeta</button>
+        <button onclick="subirArchivo()">Subir</button>
+        <hr>
+        <nav>
+            <ul>
+                <li onclick="cambiarVista('mis_archivos')"><i class="fa fa-folder"></i> Mis archivos</li>
+                <li onclick="cambiarVista('compartidos')"><i class="fa fa-users"></i> Compartidos conmigo</li>
+                <li onclick="cambiarVista('papelera')"><i class="fa fa-trash"></i> Papelera</li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Vista de archivos -->
+    <main class="file-view">
+        <div class="path-bar">
+            Ruta: <span th:text="${rutaActual}">/</span>
+        </div>
+
+        <div class="grid">
+            <!-- Carpeta -->
+            <div class="item folder" th:each="carpeta : ${carpetas}" onclick="abrirCarpeta('[[${carpeta.nombre}]]')">
+                <i class="fa fa-folder fa-3x"></i>
+                <div class="item-name" th:text="${carpeta.nombre}">Carpeta</div>
+            </div>
+
+            <!-- Archivo -->
+            <div class="item file" th:each="archivo : ${archivos}" onclick="verArchivo('[[${archivo.nombre}]]')">
+                <i class="fa fa-file-alt fa-3x"></i>
+                <div class="item-name" th:text="${archivo.nombre}">Archivo.txt</div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    function crearArchivo() {
+        window.location.href = '/crear-archivo';
+    }
+
+    function crearDirectorio() {
+        window.location.href = '/crear-carpeta';
+    }
+
+    function subirArchivo() {
+        window.location.href = '/subir-archivo';
+    }
+
+    function abrirCarpeta(nombre) {
+        window.location.href = '/navegar?carpeta=' + nombre;
+    }
+
+    function verArchivo(nombre) {
+        window.location.href = '/ver?archivo=' + nombre;
+    }
+
+    function logout() {
+        window.location.href = '/logout';
+    }
+
+    function cambiarVista(vista) {
+        window.location.href = '/' + vista;
+    }
+</script>
+
+</body>
+</html>
