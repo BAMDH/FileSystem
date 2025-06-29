@@ -4,6 +4,7 @@ import controller.Controller;
 import modelo.Drive;
 
 import java.util.Scanner;
+import util.FS;
 
 /**
  *
@@ -35,8 +36,14 @@ public class FS_Drive {
                             5. Ver archivo <nombre.extension>
                             6. Modificar archivo <nombre.extension> <nuevo contenido>
                             7. Propiedades del un archivo <nombre.extension>
-                            8. Eliminar archivo <nombre.extension>
-                            9. Salir""");
+                            8. Eliminar archivo o directorio <nombre>
+                            9. Copiar archivo <nombre.extension> <directorio destino>
+                           10. Mover archivo o directorio <nombre> <directorio destino>
+                           11. Compartir archivo <nombre> <usuario>
+                           12. Subir archivo <ruta del archivo>
+                           13. Descargar archivo <nombre> <ruta destino>
+                           14. Salir
+                           """);
 
         boolean running = true;
         while (running) {
@@ -56,7 +63,7 @@ public class FS_Drive {
                 }
                 case "3" -> {
                     if (parts.length < 2) {
-                        System.out.println("Uso: 3 <nombre|..>");
+                        System.out.println("Uso: 3 <directorio o .. para volver al anterior>");
                     } else {
                         controller.cambiarDirectorio(parts[1]);
                     }
@@ -106,6 +113,43 @@ public class FS_Drive {
                     }
                 }
                 case "9" -> {
+                    if (parts.length < 3) {
+                        System.out.println("Uso: 9 <nombre.extension> <directorio destino>");
+                    } else {
+                        controller.copiarArchivo(parts[1], parts[2]);
+                        util.FS.guardarDrive(drive);
+                    }
+                }
+                case "10" -> {
+                    if (parts.length < 3) {
+                        System.out.println("Uso: 10 <nombre> <directorio destino>");
+                    } else {
+                        controller.mover(parts[1], parts[2]);
+                        util.FS.guardarDrive(drive);
+                    }
+                }
+                case "11" -> {
+                    if (parts.length < 3) {
+                        System.out.println("Uso: 11 <nombre> <usuario>");
+                    } else {
+                        controller.compartir(parts[1], parts[2]);
+                    }
+                }
+                case "12" -> {
+                    if (parts.length < 2) {
+                        System.out.println("Uso: 12 <ruta del archivo>");
+                    } else {
+                        controller.loadArchivo(parts[1]);
+                    }
+                }                
+                case "13" -> {
+                    if (parts.length < 3) {
+                        System.out.println("Uso: 13 <nombre> <ruta destino>");
+                    } else {
+                        controller.downloadArchivo(parts[1], parts[2]);
+                    }
+                }                
+                case "14" -> {
                     util.FS.guardarDrive(drive);
                     running = false;
                 }

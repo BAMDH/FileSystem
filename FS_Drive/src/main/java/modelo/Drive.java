@@ -1,5 +1,7 @@
 package modelo;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author Psicops
@@ -9,7 +11,6 @@ public class Drive {
     private long maxSizeBytes;
     private long usedSpace;
     private Directory root;
-    private Directory shared;
     private Directory current;
 
     public Drive(String username, long maxSizeBytes) {
@@ -17,13 +18,15 @@ public class Drive {
         this.maxSizeBytes = maxSizeBytes;
         this.usedSpace = 0;
         this.root = new Directory("root", null);
-        this.shared = new Directory("shared", null);
+        this.root.setProtectedDir(true);
+        Directory shared = new Directory("shared", root);
+        shared.setProtectedDir(true);
+        this.root.addSubdirectory(shared);
         this.current = root;
     }
 
     public void rebuildParents() {
         rebuildParentsRecursive(root, null);
-        rebuildParentsRecursive(shared, null);
     }
 
     private void rebuildParentsRecursive(Directory dir, Directory parent) {
@@ -49,10 +52,6 @@ public class Drive {
 
     public void goToRoot() {
         current = root;
-    }
-
-    public void goToShared() {
-        current = shared;
     }
 
     public String getUsername() {
@@ -87,19 +86,26 @@ public class Drive {
         this.root = root;
     }
 
-    public Directory getShared() {
-        return shared;
-    }
-
-    public void setShared(Directory shared) {
-        this.shared = shared;
-    }
-
     public Directory getCurrent() {
         return current;
     }
 
     public void setCurrent(Directory current) {
         this.current = current;
+    }
+    
+    public Directory searchDir(String nombre, Directory search) {
+        if(search.getName().equals(nombre)) return search;
+        for (Directory d : search.getSubdirectories()) {
+            if (d.getName().equals(nombre)) {
+                return d;
+            } else {
+                Directory found = searchDir(nombre, d);
+                if (found != null) {
+                    return found;
+                }
+            }
+        }
+        return null;
     }
 }
