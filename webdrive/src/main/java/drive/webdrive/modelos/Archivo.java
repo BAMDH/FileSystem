@@ -1,45 +1,65 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package drive.webdrive.modelos;
 
-/**
- *
- * @author drayo
- */
 import java.time.LocalDateTime;
+import com.google.gson.annotations.JsonAdapter;
 
 public class Archivo {
-    private String nombre;
+    private String name;
     private String extension;
-    private String contenido;
-    private LocalDateTime creado;
-    private LocalDateTime modificado;
-    private int tamano;
+    private String content;
+    private int size;
+    
+    @JsonAdapter(LocalDateTimeAdapter.class)
+    private LocalDateTime creationDate;
+    
+    @JsonAdapter(LocalDateTimeAdapter.class)
+    private LocalDateTime modificationDate;
 
     public Archivo() {}
 
-    public Archivo(String nombre, String extension, String contenido) {
-        this.nombre = nombre;
+    public Archivo(String name, String extension, String content) {
+        this.name = name;
         this.extension = extension;
-        this.contenido = contenido;
-        this.creado = LocalDateTime.now();
-        this.modificado = LocalDateTime.now();
-        this.tamano = contenido.length();
+        this.content = content;
+        this.size = content.length();
+        this.creationDate = LocalDateTime.now();
+        this.modificationDate = LocalDateTime.now();
     }
 
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
+    // Getters y Setters
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
     public String getExtension() { return extension; }
     public void setExtension(String extension) { this.extension = extension; }
-    public String getContenido() { return contenido; }
-    public void setContenido(String contenido) {
-        this.contenido = contenido;
-        this.modificado = LocalDateTime.now();
-        this.tamano = contenido.length();
+
+    public String getContent() { return content; }
+    public void setContent(String content) {
+        this.content = content;
+        this.modificationDate = LocalDateTime.now();
+        this.size = content.length();
     }
-    public LocalDateTime getCreado() { return creado; }
-    public LocalDateTime getModificado() { return modificado; }
-    public int getTamano() { return tamano; }
+
+    public int getSize() { return size; }
+    public void setSize(int size) { this.size = size; }
+
+    public LocalDateTime getCreationDate() { return creationDate; }
+    public void setCreationDate(LocalDateTime creationDate) { this.creationDate = creationDate; }
+
+    public LocalDateTime getModificationDate() { return modificationDate; }
+    public void setModificationDate(LocalDateTime modificationDate) { 
+        this.modificationDate = modificationDate; 
+    }
+    // En la clase Archivo
+@Override
+public String toString() {
+    return "Archivo{" +
+            "name='" + name + '\'' +
+            ", extension='" + extension + '\'' +
+            ", content='" + (content != null ? content.substring(0, Math.min(content.length(), 20)) + (content.length() > 20 ? "..." : "") : "null") + '\'' +
+            ", size=" + size +
+            ", creationDate=" + creationDate +
+            ", modificationDate=" + modificationDate +
+            '}';
+}
 }

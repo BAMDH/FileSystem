@@ -8,6 +8,10 @@ package drive.webdrive.Services;
  *
  * @author drayo
  */
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import drive.webdrive.modelos.*;
 import drive.webdrive.utils.JsonManager;
 import drive.webdrive.modelos.Directorio;
@@ -30,8 +34,18 @@ public class DriveService {
         try {
             RestTemplate restTemplate = new RestTemplate();
             String url = SERVER_URL + "/api/usuario/" + nombre;
-            UsuarioData usuario = restTemplate.getForObject(url, UsuarioData.class);
+             // Obtener el JSON como string plano
+        String json = restTemplate.getForObject(url, String.class);
+
+
+        // Imprimir JSON bonito
+        Gson gsonPretty = new GsonBuilder().setPrettyPrinting().create();
+        JsonElement parsed = JsonParser.parseString(json);
+       // System.out.println("=== JSON formateado ===");
+       // System.out.println(gsonPretty.toJson(parsed));
+        UsuarioData usuario = new Gson().fromJson(json, UsuarioData.class);
           //  System.out.print(usuario.getNombre());
+           // System.out.println(usuario.toString());
             return usuario;
         } catch (Exception e) {
             e.printStackTrace();
@@ -39,7 +53,7 @@ public class DriveService {
         }
     }
 
-    public void crearDirectorio(UsuarioData user, String nombreDir) {
+    /*public void crearDirectorio(UsuarioData user, String nombreDir) {
         Directorio actual = user.getRaiz();
         if (actual.buscarSubdirectorio(nombreDir) == null) {
             actual.getSubdirectorios().add(new Directorio(nombreDir));
@@ -52,5 +66,5 @@ public class DriveService {
             body.put("nombre", nombreDir);
             restTemplate.postForObject(url, body, Void.class);
         }
-    }
+    }*/
 }

@@ -1,0 +1,72 @@
+{
+  "username": "admin",
+  "maxSizeBytes": 20,
+  "usedSpace": 18,
+  "root": {
+    "name": "root",
+    "subdirectories": [],
+    "files": []
+  },
+  "shared": {
+    "name": "shared",
+    "subdirectories": [],
+    "files": []
+  },
+  "current": {
+    "name": "root",
+    "subdirectories": [
+      {
+        "name": "prueba",
+        "subdirectories": [
+      {
+        "name": "nombre",
+        "subdirectories": [
+      {
+        "name": "nombre2",
+        "subdirectories": [
+      {
+        "name": "nombre3",
+        "subdirectories": [],
+        "files": [{
+        "name": "hola",
+        "extension": "txt",
+        "content": "esta es la verdadera",
+        "size": 18,
+        "creationDate": "2025-06-28 14:45:43",
+        "modificationDate": "2025-06-28 14:45:43"
+      }]
+      }],
+        "files": []
+      }],
+        "files": []
+      }],
+        "files": [{
+        "name": "hjhk",
+        "extension": "txt",
+        "content": "esta es una prueba",
+        "size": 18,
+        "creationDate": "2025-06-27 16:10:49",
+        "modificationDate": "2025-06-27 16:10:49"
+      }]
+      }
+    ],
+    "files": [
+      {
+        "name": "hola",
+        "extension": "txt",
+        "content": "esta es una prueba",
+        "size": 18,
+        "creationDate": "2025-06-28 14:45:43",
+        "modificationDate": "2025-06-28 14:45:43"
+      },
+      {
+        "name": "cocina",
+        "extension": "txt",
+        "content": "arroz con pollo ingredientes bla bla bla",
+        "size": 18,
+        "creationDate": "2025-06-28 15:45:43",
+        "modificationDate": "2025-06-28 16:45:43"
+      }
+    ]
+  }
+}

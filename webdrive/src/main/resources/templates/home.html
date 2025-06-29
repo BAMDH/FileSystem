@@ -22,6 +22,9 @@
 
     <!-- Barra lateral -->
     <aside class="sidebar">
+        <button onclick="irAtras()" class="btn-back">
+        <i class="fas fa-arrow-left"></i> Volver
+    </button>
         <button onclick="crearArchivo()">+ Archivo</button>
         <button onclick="crearDirectorio()">+ Carpeta</button>
         <button onclick="subirArchivo()">Subir</button>
@@ -41,19 +44,27 @@
             Ruta: <span th:text="${rutaActual}">/</span>
         </div>
 
-        <div class="grid">
-            <!-- Carpeta -->
-            <div class="item folder" th:each="carpeta : ${carpetas}" onclick="abrirCarpeta('[[${carpeta.nombre}]]')">
-                <i class="fa fa-folder fa-3x"></i>
-                <div class="item-name" th:text="${carpeta.nombre}">Carpeta</div>
-            </div>
-
-            <!-- Archivo -->
-            <div class="item file" th:each="archivo : ${archivos}" onclick="verArchivo('[[${archivo.nombre}]]')">
-                <i class="fa fa-file-alt fa-3x"></i>
-                <div class="item-name" th:text="${archivo.nombre}">Archivo.txt</div>
-            </div>
+        <!-- Sección de archivos actualizada -->
+    <div class="grid">
+        <!-- Carpetas -->
+        <div th:each="carpeta : ${carpetas}" 
+             class="item folder" 
+             th:attr="data-carpeta=${carpeta.name}"
+             onclick="abrirCarpeta(this.getAttribute('data-carpeta'))">
+            <i class="fa fa-folder fa-3x"></i>
+            <div class="item-name" th:text="${carpeta.name}">Carpeta</div>
         </div>
+        <!-- Archivos -->
+        <div th:each="archivo : ${archivos}" 
+            class="item file" 
+            th:attr="data-archivo=${archivo.name + '.' + archivo.extension}"
+            onclick="verArchivo(this.getAttribute('data-archivo'))">
+           <i class="fa fa-file-alt fa-3x"></i>
+           <div class="item-name">
+               <span th:text="${archivo.name}"></span>.<span th:text="${archivo.extension}"></span>
+           </div>
+        </div>
+    </div>
     </main>
 </div>
 
@@ -70,13 +81,18 @@
         window.location.href = '/subir-archivo';
     }
 
-    function abrirCarpeta(nombre) {
-        window.location.href = '/navegar?carpeta=' + nombre;
-    }
+  function abrirCarpeta(nombre) {
+    window.location.href = '/navegar?carpeta=' + encodeURIComponent(nombre);
+}
+
+function irAtras() {
+    window.location.href = '/volver';
+}
 
     function verArchivo(nombre) {
-        window.location.href = '/ver?archivo=' + nombre;
-    }
+    console.log("Abriendo archivo:", nombre);
+    window.location.href = '/ver?archivo=' + encodeURIComponent(nombre);
+}
 
     function logout() {
         window.location.href = '/logout';

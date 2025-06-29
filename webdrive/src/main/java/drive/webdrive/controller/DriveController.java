@@ -2,16 +2,30 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
+
 package drive.webdrive.controller;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ByteArrayResource;
 import drive.webdrive.Services.DriveService;
+import drive.webdrive.modelos.Archivo;
+import drive.webdrive.modelos.Directorio;
 import drive.webdrive.modelos.UsuarioData;
+
 import jakarta.servlet.http.HttpSession;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -63,22 +77,224 @@ public class DriveController {
 
     @Autowired
     private DriveService service;
+@GetMapping("/")
+public String home(HttpSession session, Model model) {
+    // 1. Verificar sesión
+    String usuario = (String) session.getAttribute("usuario");
+    if (usuario == null) return "redirect:/login";
 
-    @GetMapping("/")
-    public String index(HttpSession session, Model model) {
-        String usuario = (String) session.getAttribute("usuario");
-        if (usuario == null) return "redirect:/login";
+    // 2. Obtener datos del usuario
+    UsuarioData data = service.cargarUsuario(usuario);
+    if (data == null) return "redirect:/login";
 
+    // 3. Inicializar sesión
+    session.setAttribute("rutaActual", "/root");
+    session.setAttribute("directorioActual", data.getRaiz());
+
+    // 4. Preparar modelo
+    model.addAttribute("usuario", usuario);
+    model.addAttribute("rutaActual", "/root");
+    model.addAttribute("carpetas", data.getRaiz().getSubdirectories());
+    model.addAttribute("archivos", data.getRaiz().getFiles());
+    
+    return "home";
+}
+   @GetMapping("/ver")
+public String verArchivo(
+    @RequestParam("archivo") String nombreArchivo,
+    HttpSession session,
+    Model model) {
+    
+    // 1. Verificar sesión
+    String usuario = (String) session.getAttribute("usuario");
+    if (usuario == null) return "redirect:/login";
+
+    // 2. Obtener directorio actual desde sesión
+    Directorio directorioActual = (Directorio) session.getAttribute("directorioActual");
+    if (directorioActual == null) {
         UsuarioData data = service.cargarUsuario(usuario);
-        if (data == null) return "redirect:/login";
-
-        model.addAttribute("usuario", usuario);
-        model.addAttribute("rutaActual", data.getRutaActual());
-        model.addAttribute("carpetas", data.getRaiz().getSubdirectorios());
-        model.addAttribute("archivos", data.getRaiz().getArchivos());
-        return "drive";
+        directorioActual = data.getRaiz();
     }
 
+    // 3. Buscar archivo SOLO en el directorio actual
+    Archivo archivo = directorioActual.getFiles().stream()
+        .filter(a -> (a.getName() + "." + a.getExtension()).equals(nombreArchivo))
+        .findFirst()
+        .orElse(null);
+
+    if (archivo == null) {
+        return "redirect:/?error=Archivo+no+encontrado";
+    }
+
+    // 4. Guardar contexto para volver
+    String rutaActual = (String) session.getAttribute("rutaActual");
+    session.setAttribute("rutaParaVolver", rutaActual);
+    session.setAttribute("directorioParaVolver", directorioActual);
+
+    // 5. Preparar modelo
+    model.addAttribute("archivo", archivo);
+    return "ver-archivo";
+}
+@GetMapping("/volver-desde-archivo")
+public String volverDesdeArchivo(HttpSession session) {
+    // 1. Recuperar contexto guardado
+    String rutaParaVolver = (String) session.getAttribute("rutaParaVolver");
+    Directorio directorioParaVolver = (Directorio) session.getAttribute("directorioParaVolver");
+    
+    // 2. Validaciones
+    if (rutaParaVolver == null || directorioParaVolver == null) {
+        return "redirect:/";
+    }
+
+    // 3. Restaurar estado anterior
+    session.setAttribute("rutaActual", rutaParaVolver);
+    session.setAttribute("directorioActual", directorioParaVolver);
+    
+    // 4. Redirigir al home con el estado correcto
+    return "redirect:/";
+}@GetMapping("/navegar")
+public String navegarCarpeta(
+    @RequestParam("carpeta") String nombreCarpeta,
+    HttpSession session,
+    Model model) {
+    
+    // 1. Verificación de sesión y autenticación
+    String usuario = (String) session.getAttribute("usuario");
+    if (usuario == null) {
+        return "redirect:/login";
+    }
+
+    // 2. Cargar datos del usuario desde el servicio
+    UsuarioData data = service.cargarUsuario(usuario);
+    if (data == null) {
+        return "redirect:/login";
+    }
+
+    // 3. Manejo de la ruta actual en sesión
+    String rutaActual = (String) session.getAttribute("rutaActual");
+    Directorio directorioActual = (Directorio) session.getAttribute("directorioActual");
+    
+    // Inicialización si es la primera vez
+    if (rutaActual == null || directorioActual == null) {
+        rutaActual = "/root";
+        directorioActual = data.getRaiz();
+        session.setAttribute("rutaActual", rutaActual);
+        session.setAttribute("directorioActual", directorioActual);
+    }
+
+    // 4. Construcción de la nueva ruta con manejo de casos especiales
+    String nuevaRuta;
+    if (rutaActual.equals("/root")) {
+        nuevaRuta = "/root/" + nombreCarpeta;
+    } else {
+        nuevaRuta = rutaActual + "/" + nombreCarpeta;
+    }
+
+    // 5. Búsqueda del directorio objetivo en la estructura
+    Directorio directorioObjetivo = buscarDirectorioPorRuta(data.getRaiz(), nuevaRuta);
+    
+    // Manejo de error si no se encuentra la carpeta
+    if (directorioObjetivo == null) {
+        return "redirect:/?error=Carpeta+no+encontrada";
+    }
+
+    // 6. Guardar el estado actual como "previo" para poder volver
+    session.setAttribute("rutaPrevia", rutaActual);
+    session.setAttribute("directorioPrevio", directorioActual);
+    
+    // 7. Actualizar el estado de navegación en la sesión
+    session.setAttribute("rutaActual", nuevaRuta);
+    session.setAttribute("directorioActual", directorioObjetivo);
+
+    // 8. Preparación del modelo para la vista Thymeleaf
+    model.addAttribute("usuario", usuario);
+    model.addAttribute("rutaActual", nuevaRuta);
+    model.addAttribute("carpetas", directorioObjetivo.getSubdirectories());
+    model.addAttribute("archivos", directorioObjetivo.getFiles());
+    
+    return "home";
+}
+
+/**
+ * Método auxiliar para buscar un directorio por su ruta completa
+ */
+private Directorio buscarDirectorioPorRuta(Directorio raiz, String rutaCompleta) {
+    // Eliminar /root inicial si existe y dividir la ruta
+    String[] partesRuta = rutaCompleta.replaceFirst("^/root", "").split("/");
+    
+    Directorio directorioActual = raiz;
+    
+    for (String parte : partesRuta) {
+        if (!parte.isEmpty()) {
+            Optional<Directorio> subdirectorio = directorioActual.getSubdirectories()
+                .stream()
+                .filter(dir -> dir.getName().equals(parte))
+                .findFirst();
+            
+            if (subdirectorio.isPresent()) {
+                directorioActual = subdirectorio.get();
+            } else {
+                return null; // Subdirectorio no encontrado
+            }
+        }
+    }
+    
+    return directorioActual;
+}
+
+
+
+@GetMapping("/volver")
+public String volverAtras(HttpSession session, Model model) {
+    // 1. Obtener ruta actual
+    String rutaActual = (String) session.getAttribute("rutaActual");
+    if (rutaActual == null || rutaActual.equals("/root")) {
+        return "redirect:/";
+    }
+
+    // 2. Calcular nueva ruta
+    String nuevaRuta = rutaActual.substring(0, rutaActual.lastIndexOf('/'));
+
+    // 3. Obtener datos del usuario
+    String usuario = (String) session.getAttribute("usuario");
+    UsuarioData data = service.cargarUsuario(usuario);
+
+    // 4. Buscar directorio
+    Directorio directorioObjetivo = buscarDirectorioPorRuta(data.getRaiz(), nuevaRuta);
+    
+    if (directorioObjetivo == null) {
+        return "redirect:/";
+    }
+
+    // 5. Actualizar sesión
+    session.setAttribute("rutaActual", nuevaRuta);
+    session.setAttribute("directorioActual", directorioObjetivo);
+
+    // 6. Preparar modelo
+    model.addAttribute("usuario", usuario);
+    model.addAttribute("rutaActual", nuevaRuta);
+    model.addAttribute("carpetas", directorioObjetivo.getSubdirectories());
+    model.addAttribute("archivos", directorioObjetivo.getFiles());
+    
+    return "home";
+}
+private Directorio buscarCarpetaPorRuta(Directorio raiz, String ruta) {
+    System.out.println(ruta);
+    String[] partes = ruta.split("/");
+    Directorio actual = raiz;
+    
+    for (String parte : partes) {
+        if (!parte.isEmpty() && !parte.equals("root")) {
+            actual = actual.getSubdirectories().stream()
+                .filter(d -> d.getName().equals(parte))
+                .findFirst()
+                .orElse(null);
+            
+            if (actual == null) return null;
+        }
+    }
+    return actual;
+}
     @GetMapping("/login")
     public String login() {
         return "login";
@@ -101,7 +317,7 @@ public class DriveController {
     public String crearCarpeta(HttpSession session) {
         String usuario = (String) session.getAttribute("usuario");
         UsuarioData data = service.cargarUsuario(usuario);
-        service.crearDirectorio(data, "nuevaCarpeta");
+       // service.crearDirectorio(data, "nuevaCarpeta");
         return "redirect:/";
     }
 
