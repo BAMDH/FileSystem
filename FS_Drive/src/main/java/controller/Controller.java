@@ -16,8 +16,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 //import java.util.List;
-
 public class Controller {
+
     private Drive drive;
 
     public Controller(Drive drive) {
@@ -34,18 +34,22 @@ public class Controller {
         System.out.println("Drive cargado: " + username);
     }
 
-    public boolean existeFile(String nombre){
+    public boolean existeFile(String nombre) {
         List<Archivo> files = drive.getCurrent().getFiles();
-        for (Archivo f : files) if (f.getName().equals(nombre)) return true;
+        for (Archivo f : files) {
+            if (f.getName().equals(nombre)) {
+                return true;
+            }
+        }
         return false;
     }
-    
+
     public void crearArchivo(String nombre, String extension, String contenido) {
         if (!drive.hasEnoughSpace(contenido.getBytes().length)) {
             System.out.println("No hay suficiente espacio disponible.");
             return;
         }
-        if(!existeFile(nombre)){
+        if (!existeFile(nombre)) {
             Archivo file = new Archivo(nombre, extension, contenido);
             drive.getCurrent().addFile(file);
             drive.useSpace(file.getSize());
@@ -57,18 +61,22 @@ public class Controller {
 
     public boolean existeDir(String nombre) {
         List<Directory> subdirectories = drive.getCurrent().getSubdirectories();
-        for (Directory d : subdirectories) if (d.getName().equals(nombre)) return true;
+        for (Directory d : subdirectories) {
+            if (d.getName().equals(nombre)) {
+                return true;
+            }
+        }
         return false;
     }
-    
+
     public void crearDirectorio(String nombre) {
         Directory actual = drive.getCurrent();
-        if (!existeDir(nombre)){
+        if (!existeDir(nombre)) {
             Directory nuevo = new Directory(nombre, actual);
             actual.addSubdirectory(nuevo);
             drive.rebuildParents();
             System.out.println("Directorio creado: " + nombre);
-        } else{
+        } else {
             System.out.println("Ya existe un directorio con este nombre.");
         }
     }
@@ -89,6 +97,22 @@ public class Controller {
                 System.out.println("Directorio no encontrado.");
             }
         }
+    }
+
+    public void buscarDirectorio(String ruta) {
+        
+        String sinRoot = ruta.replaceFirst("^/root", "");
+
+// Dividir por "/"
+        String[] partes = sinRoot.split("/");
+
+// Recorrer los nombres (ignorando vacíos)
+        for (String parte : partes) {
+            if (!parte.isEmpty()) {
+                cambiarDirectorio(parte);
+            }
+        }
+
     }
 
     public void listarDirectorio() {
@@ -140,13 +164,13 @@ public class Controller {
         Archivo file = drive.getCurrent().getFile(nombreCompleto);
         Directory destino = drive.searchDir(dirDestino, drive.getRoot());
         if (file != null && destino != null) {
-            if(destino.getFile(nombreCompleto) == null){
+            if (destino.getFile(nombreCompleto) == null) {
                 Archivo copia = new Archivo(file.getName(), file.getExtension(), file.getContent());
                 destino.addFile(copia);
                 drive.useSpace(copia.getSize());
                 System.out.println("Archivo copiado a: " + destino.getPath());
             } else {
-                System.out.println("Ya existe un archivo con este nombre en el directorio seleccionado.");  
+                System.out.println("Ya existe un archivo con este nombre en el directorio seleccionado.");
             }
         } else {
             System.out.println("Archivo no encontrado o el directorio no existe.");
@@ -157,7 +181,7 @@ public class Controller {
         Directory current = drive.getCurrent();
         Archivo file = current.getFile(nombre);
         Directory destino = drive.searchDir(dirDestino, drive.getRoot());
-        if(destino != null){
+        if (destino != null) {
             if (file != null) {
                 current.getFiles().remove(file);
                 destino.addFile(file);
@@ -203,7 +227,7 @@ public class Controller {
             String extension = nombre.contains(".")
                     ? nombre.substring(nombre.lastIndexOf('.') + 1)
                     : "";
-            
+
             if (!drive.hasEnoughSpace(contenido.getBytes().length)) {
                 System.out.println("No hay espacio suficiente para cargar este archivo.");
                 return;
@@ -225,12 +249,12 @@ public class Controller {
             System.out.println("No se encontró el archivo: " + nombreCompleto);
             return;
         }
-        
+
         if (!file.getExtension().equalsIgnoreCase("txt")) {
             System.out.println("Solo se pueden descargar archivos .txt");
             return;
         }
-        
+
         File destino = new File(rutaDestino);
         String rutaFinal;
 
@@ -239,7 +263,7 @@ public class Controller {
         } else {
             rutaFinal = rutaDestino;
         }
-        
+
         try (FileWriter writer = new FileWriter(rutaFinal)) {
             writer.write(file.getContent());
             System.out.println("Archivo descargado en: " + rutaFinal);
@@ -257,7 +281,7 @@ public class Controller {
             System.out.println("Archivo eliminado: " + nombre);
             return;
         }
-        if(current.getSubdirectory(nombre) == null){
+        if (current.getSubdirectory(nombre) == null) {
             Directory dir = drive.searchDir(nombre, drive.getRoot());
             if (dir != null) {
                 if (dir.isProtected()) {
@@ -312,5 +336,5 @@ public class Controller {
             System.out.println("Archivo no encontrado.");
         }
     }
-    
+
 }

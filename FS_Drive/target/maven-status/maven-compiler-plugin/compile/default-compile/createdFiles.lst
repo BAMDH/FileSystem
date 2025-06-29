@@ -1,6 +1,6 @@
 modelo\Directory.class
-main\FS_Drive.class
 controller\Controller.class
+modelo\Archivo.class
+main\FS_Drive.class
 modelo\Drive.class
 util\FS.class
-modelo\Archivo.class

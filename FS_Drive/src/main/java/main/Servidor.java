@@ -133,14 +133,18 @@ class HiloCliente extends Thread {
                 String usuario = jsonBody.get("usuario").getAsString();
                 String archivo = jsonBody.get("archivo").getAsString();
                 String contenido = jsonBody.get("contenido").getAsString();
+                 String rutaActual = jsonBody.get("rutaActual").getAsString();
 
                 Drive drive = FS.cargarDrive(usuario);
                 if (drive == null) {
                     escribirRespuesta(salidaRaw, 404, "{\"error\":\"Usuario no encontrado\"}");
                     return;
                 }
-
+                
+              
                 Controller controller = new Controller(drive);
+                controller.buscarDirectorio(rutaActual);
+                
                 //boolean cambioExitoso = controller.buscarRuta(jsonBody.get("rutaActual").getAsString());
                 //if (!cambioExitoso) {
                 //    System.out.println("No se pudo cambiar a la ruta: " + jsonBody.get("rutaActual").getAsString());
@@ -148,8 +152,9 @@ class HiloCliente extends Thread {
                 //}
                 
 
+                
                 controller.modificarArchivo(archivo, contenido);
-
+                
                 FS.guardarDrive(drive);
 
                 escribirRespuesta(salidaRaw, 200, "{\"mensaje\": \"Archivo actualizado correctamente\"}");
