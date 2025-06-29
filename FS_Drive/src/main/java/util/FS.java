@@ -31,6 +31,7 @@ public class FS {
         try (FileReader reader = new FileReader(filename)) {
             Drive drive = gson.fromJson(reader, Drive.class);
             System.out.println("Drive cargado desde: " + filename);
+            drive.goToRoot();
             return drive;
         } catch (IOException e) {
             System.out.println("Usuario no encontrado.\nCreando nuevo usuario....");

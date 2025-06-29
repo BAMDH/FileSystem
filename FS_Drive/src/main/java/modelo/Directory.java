@@ -5,13 +5,13 @@ package modelo;
  * @author Psicops
  */
 import java.util.ArrayList;
-import java.util.List;
 
 public class Directory {
     private String name;
     private transient Directory parent;
-    private List<Directory> subdirectories;
-    private List<File> files;
+    private ArrayList<Directory> subdirectories;
+    private ArrayList<Archivo> files;
+    private boolean protectedDir = false;
 
     public Directory(String name, Directory parent) {
         this.name = name;
@@ -25,12 +25,13 @@ public class Directory {
         return parent.getPath() + "/" + name;
     }
 
-    public void addFile(File file) {
+    public void addFile(Archivo file) {
         files.add(file);
     }
 
     public void addSubdirectory(Directory dir) {
         subdirectories.add(dir);
+        dir.setParent(this);
     }
 
     public Directory getSubdirectory(String name) {
@@ -40,8 +41,8 @@ public class Directory {
         return null;
     }
 
-    public File getFile(String name) {
-        for (File file : files) {
+    public Archivo getFile(String name) {
+        for (Archivo file : files) {
             if (file.getFullName().equals(name)) return file;
         }
         return null;
@@ -63,21 +64,28 @@ public class Directory {
         this.parent = parent;
     }
 
-    public List<Directory> getSubdirectories() {
+    public ArrayList<Directory> getSubdirectories() {
         return subdirectories;
     }
 
-    public void setSubdirectories(List<Directory> subdirectories) {
+    public void setSubdirectories(ArrayList<Directory> subdirectories) {
         this.subdirectories = subdirectories;
     }
 
-    public List<File> getFiles() {
+    public ArrayList<Archivo> getFiles() {
         return files;
     }
 
-    public void setFiles(List<File> files) {
+    public void setFiles(ArrayList<Archivo> files) {
         this.files = files;
     }
 
+    public void setProtectedDir(boolean protectedDir) {
+        this.protectedDir = protectedDir;
+    }
     
+    public boolean isProtected(){
+        return this.protectedDir;
+    }
+
 }

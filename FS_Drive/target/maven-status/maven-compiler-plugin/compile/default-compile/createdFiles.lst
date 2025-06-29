@@ -1,9 +1,6 @@
 modelo\Directory.class
-main\HiloCliente.class
-controller\Controller.class
-modelo\UserData.class
 main\FS_Drive.class
-modelo\File.class
+controller\Controller.class
 modelo\Drive.class
 util\FS.class
-main\Servidor.class
+modelo\Archivo.class
