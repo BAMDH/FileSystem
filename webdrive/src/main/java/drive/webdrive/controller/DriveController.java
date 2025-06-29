@@ -4,6 +4,8 @@
  */
 
 package drive.webdrive.controller;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ByteArrayResource;
 import drive.webdrive.Services.DriveService;
@@ -12,6 +14,7 @@ import drive.webdrive.modelos.Directorio;
 import drive.webdrive.modelos.UsuarioData;
 
 import jakarta.servlet.http.HttpSession;
+import java.net.ConnectException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import org.springframework.stereotype.Controller;
@@ -22,12 +25,19 @@ import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 /*
 public class DriveController{
@@ -74,7 +84,7 @@ public class DriveController{
 
 @Controller
 public class DriveController {
-
+private final String SERVER_URL = "http://localhost:3000";
     @Autowired
     private DriveService service;
 @GetMapping("/")
@@ -326,4 +336,51 @@ private Directorio buscarCarpetaPorRuta(Directorio raiz, String ruta) {
         session.invalidate();
         return "redirect:/login";
     }
+    
+    
+    
+    
+   @PostMapping("/guardar-archivo")
+public ResponseEntity<String> guardarArchivoJson(
+    @RequestBody Map<String, String> datos,
+    HttpSession session
+) {
+    String usuario = (String) session.getAttribute("usuario");
+    if (usuario == null) return ResponseEntity.status(401).body("No autenticado");
+
+    String nombreArchivo = datos.get("nombreArchivo");
+    String contenido = datos.get("contenido");
+    String rutaActual = (String) session.getAttribute("rutaActual");  // <-- obtener ruta actual
+
+    try {
+        // Agregamos la ruta actual al JSON enviado
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonPayload = objectMapper.writeValueAsString(Map.of(
+            "usuario", usuario,
+            "archivo", nombreArchivo,
+            "contenido", contenido,
+            "rutaActual", rutaActual != null ? rutaActual : "/root"  // valor por defecto si es null
+        ));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> request = new HttpEntity<>(jsonPayload, headers);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> response = restTemplate.postForEntity(
+            "http://localhost:3000/api/guardar-archivo",
+            request,
+            String.class
+        );
+
+        return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+
+    } catch (Exception e) {
+        return ResponseEntity.status(500).body("Error al conectar: " + e.getMessage());
+    }
 }
+
+    
+}
+
+

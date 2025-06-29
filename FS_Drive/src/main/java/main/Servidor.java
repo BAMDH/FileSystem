@@ -12,6 +12,7 @@ import modelo.UserData;
 import util.FS;
 
 public class Servidor {
+
     public static void main(String[] args) throws IOException {
         int puerto = 3000;
         ServerSocket servidor = new ServerSocket(puerto);
@@ -22,7 +23,9 @@ public class Servidor {
             new HiloCliente(cliente).start();
         }
     }
-}class HiloCliente extends Thread {
+}
+class HiloCliente extends Thread {
+
     private Socket socket;
 
     public HiloCliente(Socket socket) {
@@ -37,28 +40,47 @@ public class Servidor {
             PrintWriter salida = new PrintWriter(salidaRaw, true)
         ) {
             Gson gson = new Gson();
-            String linea = entrada.readLine();
-            if (linea == null) return;
+            
+            // Confirmar conexión
+           // System.out.println("Conexión aceptada: " + socket.getInetAddress());
 
-            String metodo = linea.split(" ")[0];
-            String ruta = linea.split(" ")[1];
+            // Leer línea de solicitud
+            String linea = entrada.readLine();
+            if (linea == null) {
+             //   System.out.println("No se recibió ninguna línea. Conexión cerrada.");
+                return;
+            }
+
+          //  System.out.println("Línea de solicitud: " + linea);
+            String[] partes = linea.split(" ");
+            if (partes.length < 2) {
+                //System.out.println("Solicitud malformada.");
+                escribirRespuesta(salidaRaw, 400, "{\"error\":\"Solicitud malformada\"}");
+                return;
+            }
+
+            String metodo = partes[0];
+            String ruta = partes[1];
+           // System.out.println("Método: " + metodo);
+           // System.out.println("Ruta solicitada: " + ruta);
 
             // Leer headers
             int contentLength = 0;
             String header;
-            while (!(header = entrada.readLine()).isEmpty()) {
+            while ((header = entrada.readLine()) != null && !header.isEmpty()) {
+                //System.out.println("Header: " + header);
                 if (header.toLowerCase().startsWith("content-length:")) {
                     contentLength = Integer.parseInt(header.split(":")[1].trim());
                 }
             }
 
+            // Manejar rutas
             if (ruta.startsWith("/api/usuario/")) {
                 String username = ruta.split("/")[3];
 
                 Drive drive = FS.cargarDrive(username);
                 if (drive == null) {
-                    String error = "{\"error\": \"Usuario no encontrado\"}";
-                    escribirRespuesta(salidaRaw, 404, error);
+                    escribirRespuesta(salidaRaw, 404, "{\"error\": \"Usuario no encontrado\"}");
                     return;
                 }
 
@@ -78,6 +100,7 @@ public class Servidor {
                 char[] buffer = new char[contentLength];
                 entrada.read(buffer);
                 String body = new String(buffer);
+                System.out.println("Cuerpo recibido: " + body);
 
                 JsonObject jsonBody = JsonParser.parseString(body).getAsJsonObject();
                 String usuario = jsonBody.get("usuario").getAsString();
@@ -85,25 +108,59 @@ public class Servidor {
 
                 Drive drive = FS.cargarDrive(usuario);
                 if (drive == null) {
-                    String error = "{\"error\": \"Usuario no encontrado\"}";
-                    escribirRespuesta(salidaRaw, 404, error);
+                    escribirRespuesta(salidaRaw, 404, "{\"error\": \"Usuario no encontrado\"}");
                     return;
                 }
 
                 Controller controller = new Controller(drive);
                 controller.crearDirectorio(nombre);
-                //FS.guardarDrive(usuario, drive);
 
-                String respuesta = "{\"mensaje\": \"Carpeta creada\"}";
-                escribirRespuesta(salidaRaw, 200, respuesta);
+                escribirRespuesta(salidaRaw, 200, "{\"mensaje\": \"Carpeta creada\"}");
                 return;
 
-            } else {
-                String error = "{\"error\": \"Ruta no encontrada\"}";
-                escribirRespuesta(salidaRaw, 404, error);
+            } else if (metodo.equals("POST") && ruta.equals("/api/guardar-archivo")) {
+                char[] buffer = new char[contentLength];
+                int leidos = 0;
+                while (leidos < contentLength) {
+                    int actual = entrada.read(buffer, leidos, contentLength - leidos);
+                    if (actual == -1) break;
+                    leidos += actual;
+                }
+                String body = new String(buffer, 0, leidos);
+                System.out.println("Cuerpo recibido: " + body);
+
+                JsonObject jsonBody = JsonParser.parseString(body).getAsJsonObject();
+                String usuario = jsonBody.get("usuario").getAsString();
+                String archivo = jsonBody.get("archivo").getAsString();
+                String contenido = jsonBody.get("contenido").getAsString();
+
+                Drive drive = FS.cargarDrive(usuario);
+                if (drive == null) {
+                    escribirRespuesta(salidaRaw, 404, "{\"error\":\"Usuario no encontrado\"}");
+                    return;
+                }
+
+                Controller controller = new Controller(drive);
+                //boolean cambioExitoso = controller.buscarRuta(jsonBody.get("rutaActual").getAsString());
+                //if (!cambioExitoso) {
+                //    System.out.println("No se pudo cambiar a la ruta: " + jsonBody.get("rutaActual").getAsString());
+                //    return;  // o manejar error según convenga
+                //}
+                
+
+                controller.modificarArchivo(archivo, contenido);
+
+                FS.guardarDrive(drive);
+
+                escribirRespuesta(salidaRaw, 200, "{\"mensaje\": \"Archivo actualizado correctamente\"}");
+                return;
             }
 
+            // Ruta no encontrada
+            escribirRespuesta(salidaRaw, 404, "{\"error\": \"Ruta no encontrada\"}");
+
         } catch (Exception e) {
+            System.err.println("Error procesando la solicitud: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -111,18 +168,19 @@ public class Servidor {
     private void escribirRespuesta(OutputStream salida, int status, String json) throws IOException {
         String statusText = switch (status) {
             case 200 -> "OK";
+            case 400 -> "Bad Request";
             case 404 -> "Not Found";
-            default -> "Error";
+            default -> "Internal Server Error";
         };
 
         byte[] body = json.getBytes("UTF-8");
-        String headers =
-            "HTTP/1.1 " + status + " " + statusText + "\r\n" +
-            "Content-Type: application/json; charset=UTF-8\r\n" +
-            "Content-Length: " + body.length + "\r\n" +
-            "\r\n";
+        String headers = "HTTP/1.1 " + status + " " + statusText + "\r\n"
+                       + "Content-Type: application/json; charset=UTF-8\r\n"
+                       + "Content-Length: " + body.length + "\r\n"
+                       + "\r\n";
         salida.write(headers.getBytes("UTF-8"));
         salida.write(body);
         salida.flush();
     }
 }
+

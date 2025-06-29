@@ -12,6 +12,7 @@
             max-width: 800px;
             margin: 0 auto;
         }
+
         .metadatos {
             margin-bottom: 20px;
             color: #666;
@@ -20,6 +21,7 @@
             flex-wrap: wrap;
             gap: 15px;
         }
+
         .contenido {
             white-space: pre-wrap;
             font-family: monospace;
@@ -29,6 +31,7 @@
             max-height: 500px;
             overflow-y: auto;
         }
+
         .btn {
             display: inline-block;
             padding: 8px 16px;
@@ -36,13 +39,32 @@
             color: white;
             text-decoration: none;
             border-radius: 4px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .mensaje {
+            padding: 10px;
+            margin-top: 15px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .mensaje.ok {
+            background-color: #e0f5e9;
+            color: #2e7d32;
+        }
+
+        .mensaje.error {
+            background-color: #fdecea;
+            color: #c62828;
         }
     </style>
 </head>
 <body>
     <div class="contenedor-archivo">
         <h1 th:text="${archivo.name + '.' + archivo.extension}">Nombre del Archivo</h1>
-        
+
         <div class="metadatos">
             <p><strong>Tamaño:</strong> <span th:text="${archivo.size} + ' bytes'">0 bytes</span></p>
             <p><strong>Creado:</strong> 
@@ -56,16 +78,60 @@
                 </span>
             </p>
         </div>
-        
-        <div class="contenido" th:text="${archivo.content}">
-            Contenido del archivo aparecerá aquí
+
+        <!-- Formulario con JS para enviar JSON -->
+        <form id="guardarForm">
+            <input type="hidden" id="nombreArchivo" th:value="${archivo.name + '.' + archivo.extension}" />
+
+            <label for="contenido"><strong>Contenido del archivo:</strong></label>
+            <textarea id="contenido" rows="15" style="width:100%; margin-top:10px;"
+                      th:text="${archivo.content}">Contenido del archivo</textarea>
+
+            <div style="margin-top: 15px;">
+                <button type="submit" class="btn">Guardar Cambios</button>
+            </div>
+        </form>
+
+        <div id="mensaje" class="mensaje" style="display: none;"></div>
+
+        <div style="margin-top: 20px;">
+            <a th:href="@{/volver-desde-archivo}" class="btn">
+                <i class="fas fa-arrow-left"></i> Volver al directorio
+            </a>
         </div>
-        
-                <div style="margin-top: 20px;">
-             <a th:href="@{/volver-desde-archivo}" class="btn">
-                 <i class="fas fa-arrow-left"></i> Volver al directorio
-             </a>
-         </div>
     </div>
+
+    <script>
+        document.getElementById("guardarForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const nombreArchivo = document.getElementById("nombreArchivo").value;
+            const contenido = document.getElementById("contenido").value;
+
+            const response = await fetch("/guardar-archivo", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    nombreArchivo: nombreArchivo,
+                    contenido: contenido
+                })
+            });
+
+            const mensajeDiv = document.getElementById("mensaje");
+
+            if (response.ok) {
+                mensajeDiv.className = "mensaje ok";
+                mensajeDiv.textContent = "Archivo guardado correctamente";
+            } else {
+                const texto = await response.text();
+                mensajeDiv.className = "mensaje error";
+                mensajeDiv.textContent = "Error al guardar: " + texto;
+            }
+
+            mensajeDiv.style.display = "block";
+        });
+    </script>
 </body>
 </html>

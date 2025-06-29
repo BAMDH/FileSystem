@@ -206,4 +206,31 @@ public class Controller {
             System.out.println("Archivo no encontrado para compartir.");
         }
     }
+    public boolean buscarRuta(String rutaCompleta) {
+    // Suponiendo que la ruta está en formato "/root/carpeta1/carpeta2"
+    if (rutaCompleta == null || rutaCompleta.isEmpty()) return false;
+    
+    String ruta = rutaCompleta.startsWith("/root") ? rutaCompleta.substring(5) : rutaCompleta; // Quitar /root
+    
+    Directory dirActual = drive.getRoot();
+    if (ruta.isEmpty()) {
+        drive.setCurrent(dirActual);
+        return true;
+    }
+
+    String[] partes = ruta.split("/");
+    for (String parte : partes) {
+        if (parte.isEmpty()) continue;
+        Directory siguiente = dirActual.getSubdirectory(parte);
+        if (siguiente == null) {
+            // No existe el subdirectorio pedido
+            return false;
+        }
+        dirActual = siguiente;
+    }
+
+    drive.setCurrent(dirActual);
+    return true;
+}
+
 }

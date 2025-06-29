@@ -1,13 +1,5 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package drive.webdrive.config;
 
-/**
- *
- * @author drayo
- */
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -26,32 +18,30 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-   /*     http
+        http
+            .csrf(csrf -> csrf.disable()) // <--- ¡Esta línea deshabilita la protección CSRF!
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login", "/css/**", "/js/**").permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll() // Permite todas las solicitudes sin autenticación
             )
-
-*/http
-  .authorizeHttpRequests(auth -> auth
-    .anyRequest().permitAll()
-  )
-
             .logout(logout -> logout
-                .logoutSuccessUrl("/login?logout=true")
-                .permitAll()
+                .logoutSuccessUrl("/login?logout=true") // Redirecciona después de cerrar sesión
+                .permitAll() // Permite el acceso a la URL de logout para todos
             );
 
+        // Si usas H2 console o necesitas iframes, podrías añadir esta línea:
+        // .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()));
 
         return http.build();
     }
 
     @Bean
     public UserDetailsService userDetailsService(PasswordEncoder encoder) {
+        // Configuración de un usuario en memoria. Aunque no se usa para restringir acceso con permitAll(),
+        // es parte de la configuración base de seguridad.
         UserDetails user = User
             .withUsername("admin")
-            .password(encoder.encode("1234"))
-            .roles("USER")
+            .password(encoder.encode("1234")) // Codifica la contraseña
+            .roles("USER") // Asigna el rol "USER"
             .build();
 
         return new InMemoryUserDetailsManager(user);
@@ -59,6 +49,7 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
+        // Bean para el codificador de contraseñas BCrypt, necesario si usas el userDetailsService
         return new BCryptPasswordEncoder();
     }
 }
