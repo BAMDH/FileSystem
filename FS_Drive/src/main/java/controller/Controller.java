@@ -276,20 +276,20 @@ public boolean modMover(String nombre, String dirDestinoRuta) {
         return false;
     }
 
-    public void loadArchivo(String rutaLocal) {
+    public boolean loadArchivo(String rutaLocal) {
         try {
             File file = new File(rutaLocal);
 
             if (!file.exists()) {
                 System.out.println("El archivo no existe: " + rutaLocal);
-                return;
+                return false;
             }
 
             String contenido = Files.readString(Path.of(rutaLocal));
             String nombre = file.getName();
             if (!nombre.toLowerCase().endsWith(".txt")) {
                 System.out.println("Solo se permiten archivos con extensión .txt");
-                return;
+                return false;
             }
             String baseName = nombre.contains(".")
                     ? nombre.substring(0, nombre.lastIndexOf('.'))
@@ -300,7 +300,7 @@ public boolean modMover(String nombre, String dirDestinoRuta) {
 
             if (!drive.hasEnoughSpace(contenido.getBytes().length)) {
                 System.out.println("No hay espacio suficiente para cargar este archivo.");
-                return;
+                return false;
             }
 
             Archivo nuevo = new Archivo(baseName, extension, contenido);
@@ -308,8 +308,10 @@ public boolean modMover(String nombre, String dirDestinoRuta) {
             drive.useSpace(nuevo.getSize());
 
             System.out.println("Archivo cargado exitosamente: " + nombre);
+            return true;
         } catch (IOException e) {
             System.out.println("Error al leer el archivo local: " + e.getMessage());
+            return false;
         }
     }
 

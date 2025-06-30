@@ -96,40 +96,41 @@ class HiloCliente extends Thread {
                 escribirRespuesta(salidaRaw, 200, json);
                 return;
 
-            }   else if (metodo.equals("POST") && ruta.equals("/api/crear-carpeta")) {
-    // Leer el cuerpo de la solicitud
-             char[] buffer = new char[contentLength];
-             int leidos = entrada.read(buffer, 0, contentLength);
-             String body = new String(buffer, 0, leidos);
+            } else if (metodo.equals("POST") && ruta.equals("/api/crear-carpeta")) {
+                // Leer el cuerpo de la solicitud
+                char[] buffer = new char[contentLength];
+                int leidos = entrada.read(buffer, 0, contentLength);
+                String body = new String(buffer, 0, leidos);
 
-        try {
-              JsonObject jsonBody = JsonParser.parseString(body).getAsJsonObject();
-              String usuario = jsonBody.get("usuario").getAsString();
-              String nombreCarpeta = jsonBody.get("nombreCarpeta").getAsString();
-              String rutaDestino = jsonBody.get("rutaDestino").getAsString();
+                try {
+                    JsonObject jsonBody = JsonParser.parseString(body).getAsJsonObject();
+                    String usuario = jsonBody.get("usuario").getAsString();
+                    String nombreCarpeta = jsonBody.get("nombreCarpeta").getAsString();
+                    String rutaDestino = jsonBody.get("rutaDestino").getAsString();
 
-        // Cargar el drive (simplificado)
-        Drive drive = FS.cargarDrive(usuario);
-        if (drive == null) {
-            escribirRespuesta(salidaRaw, 404, "{\"error\":\"Usuario no encontrado\"}");
-            return;
-        }
+                    // Cargar el drive (simplificado)
+                    Drive drive = FS.cargarDrive(usuario);
+                    if (drive == null) {
+                        escribirRespuesta(salidaRaw, 404, "{\"error\":\"Usuario no encontrado\"}");
+                        return;
+                    }
 
-        // Crear la carpeta
-        boolean creada = createFolder(drive.getCurrent(), rutaDestino, nombreCarpeta);
+                    // Crear la carpeta
+                    boolean creada = createFolder(drive.getCurrent(), rutaDestino, nombreCarpeta);
 
-        if (creada) {
-            // Guardar cambios
-            FS.guardarDrive(drive);
-            
-            // Responder con éxito
-            escribirRespuesta(salidaRaw, 200, "{\"mensaje\":\"Carpeta creada exitosamente\"}");
-        } else {
-            escribirRespuesta(salidaRaw, 400, "{\"error\":\"No se pudo crear la carpeta\"}");
-        }
-    } catch (Exception e) {
-        escribirRespuesta(salidaRaw, 500, "{\"error\":\"Error interno del servidor\"}");
-    }} 
+                    if (creada) {
+                        // Guardar cambios
+                        FS.guardarDrive(drive);
+
+                        // Responder con éxito
+                        escribirRespuesta(salidaRaw, 200, "{\"mensaje\":\"Carpeta creada exitosamente\"}");
+                    } else {
+                        escribirRespuesta(salidaRaw, 400, "{\"error\":\"No se pudo crear la carpeta\"}");
+                    }
+                } catch (Exception e) {
+                    escribirRespuesta(salidaRaw, 500, "{\"error\":\"Error interno del servidor\"}");
+                }
+            }
 
             // Dentro de la clase que maneja las peticiones HTTP en el servidor (por ejemplo, tu HiloCliente o controlador):
             if (metodo.equals("POST") && ruta.equals("/api/copiar")) {
@@ -148,7 +149,7 @@ class HiloCliente extends Thread {
                 JsonObject jsonBody = JsonParser.parseString(body).getAsJsonObject();
                 String usuario = jsonBody.get("usuario").getAsString();
                 String rutaDestino = jsonBody.get("rutaDestino").getAsString();
-                 String rutaActual = jsonBody.get("rutaActual").getAsString();
+                String rutaActual = jsonBody.get("rutaActual").getAsString();
 
                 List<String> archivos = new ArrayList<>();
                 if (jsonBody.has("archivos")) {
@@ -171,7 +172,7 @@ class HiloCliente extends Thread {
                 for (String archivo : archivos) {
                     oh = controller.modCopiarArchivo(archivo, rutaDestino);
                 }
-                 for (String carpeta : carpetas) {
+                for (String carpeta : carpetas) {
                     oh = controller.modCopiarArchivo(carpeta, rutaDestino);
                 }
                 if (oh) {
@@ -199,7 +200,7 @@ class HiloCliente extends Thread {
                 JsonObject jsonBody = JsonParser.parseString(body).getAsJsonObject();
                 String usuario = jsonBody.get("usuario").getAsString();
                 String rutaDestino = jsonBody.get("rutaDestino").getAsString();
-                 String rutaActual = jsonBody.get("rutaActual").getAsString();
+                String rutaActual = jsonBody.get("rutaActual").getAsString();
 
                 List<String> archivos = new ArrayList<>();
                 if (jsonBody.has("archivos")) {
@@ -222,7 +223,7 @@ class HiloCliente extends Thread {
                 for (String archivo : archivos) {
                     oh = controller.modCopiarArchivo(archivo, rutaDestino);
                 }
-                 for (String carpeta : carpetas) {
+                for (String carpeta : carpetas) {
                     oh = controller.modCopiarArchivo(carpeta, rutaDestino);
                 }
                 if (oh) {
@@ -373,7 +374,7 @@ class HiloCliente extends Thread {
                 }
                 if (oh) {
                     escribirRespuesta(salidaRaw, 200, "{\"mensaje\": \"Descarga solicitada exitosa\"}");
-                 } else {
+                } else {
                     escribirRespuesta(salidaRaw, 500, "{\"error\": \"Error al descargar los elementos\"}");
                 }
                 // Aquí puedes aplicar lógica real de "descargar" si la defines, por ahora se responde exitosamente
@@ -592,6 +593,58 @@ class HiloCliente extends Thread {
                     escribirRespuesta(salidaRaw, 200, "{\"mensaje\": \"Drive creado exitosamente\"}");
                 } catch (Exception e) {
                     escribirRespuesta(salidaRaw, 500, "{\"error\": \"Error al crear el drive: " + e.getMessage() + "\"}");
+                }
+                return;
+            }
+            if (metodo.equals("POST") && ruta.equals("/api/subir-archivo")) {
+                char[] buffer = new char[contentLength];
+                int leidos = 0;
+                while (leidos < contentLength) {
+                    int actual = entrada.read(buffer, leidos, contentLength - leidos);
+                    if (actual == -1) {
+                        break;
+                    }
+                    leidos += actual;
+                }
+                String body = new String(buffer, 0, leidos);
+                System.out.println("Cuerpo recibido para subir archivo: " + body);
+
+                try {
+                    JsonObject jsonBody = JsonParser.parseString(body).getAsJsonObject();
+                    String usuario = jsonBody.get("usuario").getAsString();
+                    String nombreArchivo = jsonBody.get("nombreArchivo").getAsString();
+                    String rutaActual = jsonBody.get("rutaActual").getAsString();
+
+                    // Validaciones básicas
+                    if (usuario == null || nombreArchivo == null || rutaActual == null) {
+                        escribirRespuesta(salidaRaw, 400, "{\"error\": \"Faltan datos obligatorios\"}");
+                        return;
+                    }
+
+                    Drive drive = FS.cargarDrive(usuario);
+                    if (drive == null) {
+                        escribirRespuesta(salidaRaw, 404, "{\"error\": \"Usuario no encontrado\"}");
+                        return;
+                    }
+
+                    Controller controller = new Controller(drive);
+                    controller.buscarDirectorio(rutaActual);
+
+                    // Aquí defines la lógica para registrar o crear el archivo.
+                    // Por ejemplo, podrías llamar a un método del controller:
+                    System.out.println(nombreArchivo);
+                    boolean exito = controller.loadArchivo(nombreArchivo); // Método que creas tú.
+
+                    if (exito) {
+                        FS.guardarDrive(drive);
+                        escribirRespuesta(salidaRaw, 200, "{\"mensaje\": \"Archivo subido y registrado correctamente\"}");
+                    } else {
+                        escribirRespuesta(salidaRaw, 500, "{\"error\": \"No se pudo subir el archivo\"}");
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    escribirRespuesta(salidaRaw, 500, "{\"error\": \"Error interno del servidor\"}");
                 }
                 return;
             }

@@ -1,149 +1,300 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Crear Usuario | WebDrive</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(to right, #4e54c8, #8f94fb);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .login-container {
-            background: white;
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-            width: 100%;
-            max-width: 400px;
-        }
-        .login-container h2 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #333;
-        }
-        .login-container label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #555;
-        }
-        .login-container input[type="text"],
-        .login-container input[type="number"] {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-        .login-container button {
-            width: 100%;
-            padding: 12px;
-            background-color: #4e54c8;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        .login-container button:hover {
-            background-color: #3b41b1;
-        }
-        .message {
-            text-align: center;
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
-        .message.error {
-            color: red;
-        }
-        .message.success {
-            color: green;
-        }
-        .volver-login {
-            text-align: center;
-            margin-top: 15px;
-        }
-        .volver-login a {
-            color: #4e54c8;
-            text-decoration: none;
-            font-weight: 600;
-        }
-        .volver-login a:hover {
-            text-decoration: underline;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <title>Mi WebDrive</title>
+    <link rel="stylesheet" th:href="@{/css/drive.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
-    <div class="login-container">
-        <h2>Crear Usuario</h2>
-        <form id="formCrearUsuario">
-            <label for="nombre">Nombre de Usuario</label>
-            <input type="text" id="nombre" name="nombre" required />
 
-            <label for="tamano">Tamaño Máximo (MB)</label>
-            <input type="number" id="tamano" name="tamano" min="1" required />
-
-            <button type="submit">Registrarse</button>
-
-            <div id="mensaje" class="message"></div>
-
-            <div class="volver-login">
-                <a th:href="@{/login}">¿Ya tienes cuenta? Inicia sesión</a>
-            </div>
-        </form>
+<!-- Barra superior -->
+<header class="header">
+    <h1>Mi WebDrive</h1>
+    <div class="user-info">
+        <span th:text="${usuario}">Usuario</span>
+        <button onclick="logout()">Salir</button>
     </div>
+</header>
 
-    <script>
-        const form = document.getElementById('formCrearUsuario');
-        const mensajeDiv = document.getElementById('mensaje');
+<!-- Contenedor general -->
+<div class="container">
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
+    <!-- Barra lateral -->
+    <aside class="sidebar">
+        <button onclick="irAtras()" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Volver
+        </button>
+        <button onclick="crearArchivo()">+ Archivo</button>
+        <button onclick="crearDirectorio()">+ Carpeta</button>
+        <button onclick="subirArchivo()">Subir</button>
+        <hr>
+    </aside>
 
-            const nombre = form.nombre.value.trim();
-            const tamano = parseInt(form.tamano.value);
+    <!-- Vista de archivos -->
+    <main class="file-view">
+        <div class="path-bar">
+            Ruta: <span th:text="${rutaActual}">/</span>
+        </div>
 
-            if (!nombre || !tamano || tamano < 1) {
-                mensajeDiv.textContent = 'Por favor completa los campos correctamente.';
-                mensajeDiv.className = 'message error';
-                return;
-            }
+        <div class="actions-bar">
+            <input type="text" id="Destino" placeholder="Destino" />
+            <button onclick="borrarSeleccionados()"><i class="fa fa-trash"></i> Borrar</button>
+            <button onclick="compartirSeleccionados()"><i class="fa fa-share-alt"></i> Compartir</button>
+            <button onclick="copiarSeleccionados()"><i class="fa fa-copy"></i> Copiar</button>
+            <button onclick="moverSeleccionados()"><i class="fa fa-arrows-alt"></i> Mover</button>
+            <button onclick="descargarSeleccionados()"><i class="fa fa-download"></i> Descargar</button>
+        </div>
+
+        <!-- Grid de carpetas y archivos -->
+        <div class="grid">
+            <div th:each="carpeta : ${carpetas}" class="item folder" th:attr="data-carpeta=${carpeta.name}">
+                <input type="checkbox" class="item-checkbox" th:attr="data-nombre=${carpeta.name}">
+                <div onclick="abrirCarpeta(this.parentElement.getAttribute('data-carpeta'))">
+                    <i class="fa fa-folder fa-3x"></i>
+                    <div class="item-name" th:text="${carpeta.name}">Carpeta</div>
+                </div>
+            </div>
+
+            <div th:each="archivo : ${archivos}" class="item file" th:attr="data-archivo=${archivo.name + '.' + archivo.extension}">
+                <input type="checkbox" class="item-checkbox" th:attr="data-nombre=${archivo.name + '.' + archivo.extension}">
+                <div onclick="verArchivo(this.parentElement.getAttribute('data-archivo'))">
+                    <i class="fa fa-file-alt fa-3x"></i>
+                    <div class="item-name">
+                        <span th:text="${archivo.name}"></span>.<span th:text="${archivo.extension}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Input oculto para subir archivo -->
+<input type="file" id="archivoInput" style="display:none" />
+
+<script>
+    function obtenerSeleccionados() {
+        const seleccionados = [];
+        document.querySelectorAll('.item-checkbox:checked').forEach(cb => {
+            seleccionados.push(cb.getAttribute('data-nombre'));
+        });
+        return seleccionados;
+    }
+
+    function subirArchivo() {
+        const input = document.createElement("input");
+        input.type = "file";
+
+        input.onchange = async () => {
+            const archivo = input.files[0];
+            if (!archivo) return;
+
+            const formData = new FormData();
+            formData.append("archivo", archivo);
+
+            const rutaActual = document.querySelector(".path-bar span").textContent || "/root";
+            formData.append("ruta", rutaActual);
 
             try {
-                const response = await fetch('/crear-usuario', {
+                const response = await fetch('/subir-archivo', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        nombre: nombre,
-                        tamano: tamano
-                    })
+                    body: formData
                 });
 
+                const mensaje = await response.text();
+                alert(mensaje);
+
                 if (response.ok) {
-                    const texto = await response.text();
-                    mensajeDiv.textContent = texto || 'Usuario registrado con éxito. Ahora puedes iniciar sesión.';
-                    mensajeDiv.className = 'message success';
-                    form.reset();
-                } else {
-                    const errorTexto = await response.text();
-                    mensajeDiv.textContent = errorTexto || 'Error al registrar el usuario.';
-                    mensajeDiv.className = 'message error';
+                    window.location.reload();
                 }
             } catch (error) {
-                mensajeDiv.textContent = 'Error en la conexión: ' + error.message;
-                mensajeDiv.className = 'message error';
+                alert("Error al subir el archivo: " + error.message);
             }
+        };
+
+        input.click();
+    }
+
+    function borrarSeleccionados() {
+        const seleccionados = obtenerSeleccionados();
+        if (seleccionados.length === 0) {
+            alert("Selecciona al menos un archivo o carpeta para borrar.");
+            return;
+        }
+
+        const archivos = [];
+        const carpetas = [];
+
+        seleccionados.forEach(nombre => {
+            if (nombre.includes('.')) archivos.push(nombre);
+            else carpetas.push(nombre);
         });
-    </script>
+
+        const data = { archivos, carpetas };
+
+        fetch('/borrar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(resp => resp.text())
+        .then(msg => {
+            alert("Respuesta del servidor: " + msg);
+            window.location.reload();
+        })
+        .catch(err => alert("Error al borrar: " + err));
+    }
+
+    function compartirSeleccionados() {
+        const usuarioDestino = document.getElementById('Destino').value.trim();
+        if (!usuarioDestino) {
+            alert("Debes indicar el usuario destino.");
+            return;
+        }
+
+        const seleccionados = obtenerSeleccionados();
+        if (seleccionados.length === 0) {
+            alert("Selecciona archivos o carpetas para compartir.");
+            return;
+        }
+
+        const archivos = [], carpetas = [];
+        seleccionados.forEach(nombre => {
+            if (nombre.includes('.')) archivos.push(nombre);
+            else carpetas.push(nombre);
+        });
+
+        const data = { usuarioDestino, archivos, carpetas };
+
+        fetch('/compartir', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(resp => resp.text())
+        .then(msg => alert("Respuesta del servidor: " + msg))
+        .catch(err => alert("Error al compartir: " + err));
+    }
+
+    function copiarSeleccionados() {
+        const rutaDestino = document.getElementById('Destino').value.trim();
+        if (!rutaDestino) {
+            alert("Debes indicar la ruta destino.");
+            return;
+        }
+
+        const seleccionados = obtenerSeleccionados();
+        if (seleccionados.length === 0) {
+            alert("Selecciona al menos un archivo o carpeta para copiar.");
+            return;
+        }
+
+        const archivos = [], carpetas = [];
+        seleccionados.forEach(nombre => {
+            if (nombre.includes('.')) archivos.push(nombre);
+            else carpetas.push(nombre);
+        });
+
+        fetch('/copiar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rutaDestino, archivos, carpetas })
+        })
+        .then(resp => resp.text())
+        .then(msg => alert("Respuesta servidor: " + msg))
+        .catch(err => alert("Error al copiar: " + err));
+    }
+
+    function moverSeleccionados() {
+        const rutaDestino = document.getElementById('Destino').value.trim();
+        if (!rutaDestino) {
+            alert("Debes indicar la ruta destino.");
+            return;
+        }
+
+        const seleccionados = obtenerSeleccionados();
+        if (seleccionados.length === 0) {
+            alert("Selecciona al menos un archivo o carpeta para mover.");
+            return;
+        }
+
+        const archivos = [], carpetas = [];
+        seleccionados.forEach(nombre => {
+            if (nombre.includes('.')) archivos.push(nombre);
+            else carpetas.push(nombre);
+        });
+
+        fetch('/mover', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rutaDestino, archivos, carpetas })
+        })
+        .then(resp => {
+            if (resp.ok) return resp.text();
+            else return resp.text().then(err => { throw new Error(err); });
+        })
+        .then(msg => {
+            alert("Respuesta servidor: " + msg);
+            window.location.reload();
+        })
+        .catch(err => alert("Error al mover: " + err.message));
+    }
+
+    function descargarSeleccionados() {
+        const rutaDestino = document.getElementById('Destino').value.trim();
+        if (!rutaDestino) {
+            alert("Debes indicar la ruta destino.");
+            return;
+        }
+
+        const seleccionados = obtenerSeleccionados();
+        if (seleccionados.length === 0) {
+            alert("Selecciona archivos o carpetas para descargar.");
+            return;
+        }
+
+        const archivos = [], carpetas = [];
+        seleccionados.forEach(nombre => {
+            if (nombre.includes('.')) archivos.push(nombre);
+            else carpetas.push(nombre);
+        });
+
+        const data = { archivos, carpetas, rutaDestino };
+
+        fetch('/descargar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(resp => resp.text())
+        .then(msg => alert("Respuesta servidor: " + msg))
+        .catch(err => alert("Error al descargar: " + err.message));
+    }
+
+    function crearArchivo() {
+        window.location.href = '/crear-archivo';
+    }
+
+    function crearDirectorio() {
+        window.location.href = '/crear-carpeta';
+    }
+
+    function irAtras() {
+        window.location.href = '/volver';
+    }
+
+    function abrirCarpeta(nombre) {
+        window.location.href = '/navegar?carpeta=' + encodeURIComponent(nombre);
+    }
+
+    function verArchivo(nombre) {
+        window.location.href = '/ver?archivo=' + encodeURIComponent(nombre);
+    }
+
+    function logout() {
+        window.location.href = '/logout';
+    }
+</script>
+
 </body>
 </html>

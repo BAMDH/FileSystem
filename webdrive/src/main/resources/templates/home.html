@@ -28,6 +28,9 @@
         <button onclick="crearArchivo()">+ Archivo</button>
         <button onclick="crearDirectorio()">+ Carpeta</button>
         <button onclick="subirArchivo()">Subir</button>
+<input type="text" id="inputRutaManual" placeholder="Ingrese la ruta para subir" style="width: 100%; margin-top: 8px; padding: 5px;" />
+
+
         <hr>
         
     </aside>
@@ -326,10 +329,36 @@ function moverSeleccionados() {
         var folder=prompt("Carpeta nueva");
         window.location.href = '/crear-carpeta?carpeta=' + encodeURIComponent(folder);
     }
-
+    
+    
+    
+    
+    
+    
     function subirArchivo() {
-        window.location.href = '/subir-archivo';
+    let rutaManual = document.getElementById('inputRutaManual').value.trim();
+    if (!rutaManual) {
+        alert("Ingresa la ruta para subir el archivo.");
+        return;
     }
+
+    // Solo enviamos la rutaManual como nombreArchivo (si quieres enviar otro dato, agrega)
+    const data = {
+        nombreArchivo: rutaManual
+    };
+
+    fetch("http://localhost:8081/subir-archivo", {  // URL del backend Spring Boot
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+    })
+    .then(resp => resp.text())
+    .then(msg => {
+        alert("Respuesta servidor: " + msg);
+        window.location.reload(); // ✅ Refresca la vista
+    })
+    .catch(err => alert("Error al conectar: " + err.message));
+}
 
   function abrirCarpeta(nombre) {
     window.location.href = '/navegar?carpeta=' + encodeURIComponent(nombre);
