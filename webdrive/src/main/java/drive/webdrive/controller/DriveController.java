@@ -564,6 +564,65 @@ public ResponseEntity<String> moverElementos(
         return ResponseEntity.status(500).body("Error al mover: " + e.getMessage());
     }
 }
+
+@GetMapping("/registro")
+public String mostrarRegistro() {
+    return "registro"; // Asegúrate que exista registro.html en /templates
+}
+
+
+
+
+
+@PostMapping("/crear-usuario")
+public ResponseEntity<String> crearUsuarioJson(
+    @RequestBody Map<String, Object> datos,
+    HttpSession session
+) {
+    // Opcional: si quieres usar usuario de sesión, aquí se obtiene
+    // String usuarioSesion = (String) session.getAttribute("usuario");
+
+    try {
+        String nombre = (String) datos.get("nombre");
+        Integer tamano = null;
+        // Convierte Number a Integer por seguridad
+        Object tamanoObj = datos.get("tamano");
+        if (tamanoObj instanceof Integer) {
+            tamano = (Integer) tamanoObj;
+        } else if (tamanoObj instanceof Number) {
+            tamano = ((Number) tamanoObj).intValue();
+        }
+
+        if (nombre == null || nombre.isEmpty() || tamano == null || tamano < 1) {
+            return ResponseEntity.badRequest().body("Datos inválidos");
+        }
+
+        // Preparamos JSON para el backend
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonPayload = objectMapper.writeValueAsString(Map.of(
+            "username", nombre,
+            "maxSizeBytes", tamano * 1024 * 1024 // convertir MB a bytes si tu backend espera bytes
+        ));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> request = new HttpEntity<>(jsonPayload, headers);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> response = restTemplate.postForEntity(
+            "http://localhost:3000/api/registro",  // URL del backend
+            request,
+            String.class
+        );
+
+        return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+
+    } catch (Exception e) {
+        return ResponseEntity.status(500).body("Error al conectar con el servidor: " + e.getMessage());
+    }
+}
+
+
 }
 
 

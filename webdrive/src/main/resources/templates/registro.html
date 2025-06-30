@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crear Usuario | WebDrive</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #4e54c8, #8f94fb);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+        .login-container h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .login-container label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        .login-container input[type="text"],
+        .login-container input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .login-container button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4e54c8;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .login-container button:hover {
+            background-color: #3b41b1;
+        }
+        .message {
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .message.error {
+            color: red;
+        }
+        .message.success {
+            color: green;
+        }
+        .volver-login {
+            text-align: center;
+            margin-top: 15px;
+        }
+        .volver-login a {
+            color: #4e54c8;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .volver-login a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Crear Usuario</h2>
+        <form id="formCrearUsuario">
+            <label for="nombre">Nombre de Usuario</label>
+            <input type="text" id="nombre" name="nombre" required />
+
+            <label for="tamano">Tamaño Máximo (MB)</label>
+            <input type="number" id="tamano" name="tamano" min="1" required />
+
+            <button type="submit">Registrarse</button>
+
+            <div id="mensaje" class="message"></div>
+
+            <div class="volver-login">
+                <a th:href="@{/login}">¿Ya tienes cuenta? Inicia sesión</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const form = document.getElementById('formCrearUsuario');
+        const mensajeDiv = document.getElementById('mensaje');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const nombre = form.nombre.value.trim();
+            const tamano = parseInt(form.tamano.value);
+
+            if (!nombre || !tamano || tamano < 1) {
+                mensajeDiv.textContent = 'Por favor completa los campos correctamente.';
+                mensajeDiv.className = 'message error';
+                return;
+            }
+
+            try {
+                const response = await fetch('/crear-usuario', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        nombre: nombre,
+                        tamano: tamano
+                    })
+                });
+
+                if (response.ok) {
+                    const texto = await response.text();
+                    mensajeDiv.textContent = texto || 'Usuario registrado con éxito. Ahora puedes iniciar sesión.';
+                    mensajeDiv.className = 'message success';
+                    form.reset();
+                } else {
+                    const errorTexto = await response.text();
+                    mensajeDiv.textContent = errorTexto || 'Error al registrar el usuario.';
+                    mensajeDiv.className = 'message error';
+                }
+            } catch (error) {
+                mensajeDiv.textContent = 'Error en la conexión: ' + error.message;
+                mensajeDiv.className = 'message error';
+            }
+        });
+    </script>
+</body>
+</html>
