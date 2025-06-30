@@ -137,6 +137,7 @@ class HiloCliente extends Thread {
                      char[] buffer = new char[contentLength];
                      int leidos = entrada.read(buffer, 0, contentLength);
                      String body = new String(buffer, 0, leidos);
+                     System.out.println("body " + body);
     
             try {
               
@@ -643,6 +644,10 @@ class HiloCliente extends Thread {
                 }
                 return;
             }
+            if (metodo.equals("OPTIONS") && ruta.equals("/api/crear-archivo")) {
+                escribirRespuesta(salidaRaw, 200, ""); // Respuesta vacía con headers CORS
+                 return;
+            }
             if (metodo.equals("POST") && ruta.equals("/api/subir-archivo")) {
                 char[] buffer = new char[contentLength];
                 int leidos = 0;
@@ -719,6 +724,9 @@ class HiloCliente extends Thread {
 
         byte[] body = json.getBytes("UTF-8");
         String headers = "HTTP/1.1 " + status + " " + statusText + "\r\n"
+                + "Access-Control-Allow-Origin: http://localhost:8081\r\n"
+                + "Access-Control-Allow-Methods: POST, GET, OPTIONS\r\n"   // Métodos permitidos
+                + "Access-Control-Allow-Headers: Content-Type\r\n"         // Headers permitidos
                 + "Content-Type: application/json; charset=UTF-8\r\n"
                 + "Content-Length: " + body.length + "\r\n"
                 + "\r\n";

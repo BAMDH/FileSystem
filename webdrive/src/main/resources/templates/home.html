@@ -5,6 +5,8 @@
     <title>Mi WebDrive</title>
     <link rel="stylesheet" th:href="@{/css/drive.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+
 </head>
 <body>
 
@@ -25,7 +27,7 @@
         <button onclick="irAtras()" class="btn-back">
         <i class="fas fa-arrow-left"></i> Volver
     </button>
-        <button onclick="crearArchivo()">+ Archivo</button>
+        <button onclick="mostrarModalCrearArchivo()">+ Archivo</button>
         <button onclick="crearDirectorio()">+ Carpeta</button>
         <button onclick="subirArchivo()">Subir</button>
 <input type="text" id="inputRutaManual" placeholder="Ingrese la ruta para subir" style="width: 100%; margin-top: 8px; padding: 5px;" />
@@ -38,7 +40,7 @@
     <!-- Vista de archivos -->
     <main class="file-view">
         <div class="path-bar">
-            Ruta: <span th:text="${rutaActual}">/</span>
+            Ruta: <span id="rutaActual" th:text="${rutaActual}">/</span>
         </div>
 <!-- Acciones sobre elementos seleccionados -->
 <!-- Acciones sobre elementos seleccionados -->
@@ -89,7 +91,92 @@
     </main>
 </div>
 
+
+<!-- Modal para crear archivo -->
+<div id="modalCrearArchivo" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="cerrarModalCrearArchivo()">&times;</span>
+        <h2>Crear nuevo archivo</h2>
+        <form id="formCrearArchivo">
+            <div class="form-group">
+                <label for="nombreArchivo">Nombre del archivo:</label>
+                <input type="text" id="nombreArchivo" required>
+            </div>
+            <div class="form-group">
+                <label for="extensionArchivo">Extensión:</label>
+                <input type="text" id="extensionArchivo" required>
+            </div>
+            <div class="form-group">
+                <label for="contenidoArchivo">Contenido:</label>
+                <textarea id="contenidoArchivo" rows="5" required></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="button" onclick="cerrarModalCrearArchivo()">Cancelar</button>
+                <button type="button" onclick="enviarArchivo()">Crear</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
 <script>
+
+     // Función para mostrar el modal de crear archivo
+    function mostrarModalCrearArchivo() {
+        document.getElementById('modalCrearArchivo').style.display = 'block';
+    }
+    
+    // Función para cerrar el modal de crear archivo
+    function cerrarModalCrearArchivo() {
+        document.getElementById('modalCrearArchivo').style.display = 'none';
+        document.getElementById('formCrearArchivo').reset();
+    }
+    
+    // Función para enviar los datos del archivo al servidor
+    function enviarArchivo() {
+        console.log("enviando el archivo")
+        const nombreArchivo = document.getElementById('nombreArchivo').value.trim();
+        const extension = document.getElementById('extensionArchivo').value.trim();
+        const contenido = document.getElementById('contenidoArchivo').value.trim();
+        const rutaDestino = document.getElementById('rutaActual').textContent;
+        const usuario = document.querySelector('.user-info span').textContent;
+        
+        if (!nombreArchivo || !extension || !contenido) {
+            alert('Por favor complete todos los campos');
+            return;
+        }
+        
+        const data = {
+            usuario: usuario,
+            nombreArchivo: nombreArchivo,
+            extension: extension,
+            contenido: contenido,
+            rutaDestino: rutaDestino
+        };
+        
+        fetch('http://localhost:3000/api/crear-archivo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la respuesta del servidor');
+            }
+            return response.text();
+        })
+        .then(message => {
+            alert(message);
+            cerrarModalCrearArchivo();
+            window.location.reload(); // Recargar para ver el nuevo archivo
+        })
+        .catch(error => {
+            alert('Error al crear el archivo: ' + error.message);
+        });
+    }
+
+
+
 
 
 

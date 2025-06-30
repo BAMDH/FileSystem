@@ -1,7 +1,7 @@
 {
   "username": "admin",
   "maxSizeBytes": 10000,
-  "usedSpace": -2,
+  "usedSpace": 37,
   "root": {
     "name": "root",
     "subdirectories": [
@@ -27,7 +27,16 @@
             "protectedDir": false
           }
         ],
-        "files": [],
+        "files": [
+          {
+            "name": "documento4",
+            "extension": "txt",
+            "content": "Este es un archivo de prueba",
+            "size": 28,
+            "creationDate": "2025-06-30 06:19:40",
+            "modificationDate": "2025-06-30 06:19:40"
+          }
+        ],
         "protectedDir": false
       },
       {
@@ -48,6 +57,14 @@
             "size": 28,
             "creationDate": "2025-06-30 05:25:05",
             "modificationDate": "2025-06-30 05:25:05"
+          },
+          {
+            "name": "documento4",
+            "extension": "txt",
+            "content": "Este es un archivo de prueba",
+            "size": 28,
+            "creationDate": "2025-06-30 06:07:46",
+            "modificationDate": "2025-06-30 06:07:46"
           }
         ],
         "protectedDir": false
@@ -55,7 +72,16 @@
       {
         "name": "otro",
         "subdirectories": [],
-        "files": [],
+        "files": [
+          {
+            "name": "test",
+            "extension": "txt",
+            "content": "dsfwef",
+            "size": 6,
+            "creationDate": "2025-06-30 06:38:00",
+            "modificationDate": "2025-06-30 06:38:00"
+          }
+        ],
         "protectedDir": false
       },
       {
@@ -81,44 +107,9 @@
         "subdirectories": [],
         "files": [],
         "protectedDir": false
-      },
-      {
-        "name": "prueba",
-        "subdirectories": [],
-        "files": [],
-        "protectedDir": false
-      },
-      {
-        "name": "iii",
-        "subdirectories": [],
-        "files": [],
-        "protectedDir": false
-      },
-      {
-        "name": "asda",
-        "subdirectories": [],
-        "files": [],
-        "protectedDir": false
       }
     ],
-    "files": [
-      {
-        "name": "hola2asda",
-        "extension": "txt",
-        "content": "esto es una preuba de ",
-        "size": 22,
-        "creationDate": "2025-06-29 21:03:52",
-        "modificationDate": "2025-06-29 22:53:02"
-      },
-      {
-        "name": "a",
-        "extension": "txt",
-        "content": "s",
-        "size": 1,
-        "creationDate": "2025-06-29 19:44:13",
-        "modificationDate": "2025-06-29 19:44:13"
-      }
-    ],
+    "files": [],
     "protectedDir": true
   },
   "current": {
@@ -146,7 +137,16 @@
             "protectedDir": false
           }
         ],
-        "files": [],
+        "files": [
+          {
+            "name": "documento4",
+            "extension": "txt",
+            "content": "Este es un archivo de prueba",
+            "size": 28,
+            "creationDate": "2025-06-30 06:19:40",
+            "modificationDate": "2025-06-30 06:19:40"
+          }
+        ],
         "protectedDir": false
       },
       {
@@ -167,6 +167,14 @@
             "size": 28,
             "creationDate": "2025-06-30 05:25:05",
             "modificationDate": "2025-06-30 05:25:05"
+          },
+          {
+            "name": "documento4",
+            "extension": "txt",
+            "content": "Este es un archivo de prueba",
+            "size": 28,
+            "creationDate": "2025-06-30 06:07:46",
+            "modificationDate": "2025-06-30 06:07:46"
           }
         ],
         "protectedDir": false
@@ -174,7 +182,16 @@
       {
         "name": "otro",
         "subdirectories": [],
-        "files": [],
+        "files": [
+          {
+            "name": "test",
+            "extension": "txt",
+            "content": "dsfwef",
+            "size": 6,
+            "creationDate": "2025-06-30 06:38:00",
+            "modificationDate": "2025-06-30 06:38:00"
+          }
+        ],
         "protectedDir": false
       },
       {
@@ -200,44 +217,9 @@
         "subdirectories": [],
         "files": [],
         "protectedDir": false
-      },
-      {
-        "name": "prueba",
-        "subdirectories": [],
-        "files": [],
-        "protectedDir": false
-      },
-      {
-        "name": "iii",
-        "subdirectories": [],
-        "files": [],
-        "protectedDir": false
-      },
-      {
-        "name": "asda",
-        "subdirectories": [],
-        "files": [],
-        "protectedDir": false
       }
     ],
-    "files": [
-      {
-        "name": "hola2asda",
-        "extension": "txt",
-        "content": "esto es una preuba de ",
-        "size": 22,
-        "creationDate": "2025-06-29 21:03:52",
-        "modificationDate": "2025-06-29 22:53:02"
-      },
-      {
-        "name": "a",
-        "extension": "txt",
-        "content": "s",
-        "size": 1,
-        "creationDate": "2025-06-29 19:44:13",
-        "modificationDate": "2025-06-29 19:44:13"
-      }
-    ],
+    "files": [],
     "protectedDir": true
   }
 }
