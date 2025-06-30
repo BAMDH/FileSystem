@@ -100,7 +100,7 @@ public class Controller {
     }
 
     public void buscarDirectorio(String ruta) {
-        
+
         String sinRoot = ruta.replaceFirst("^/root", "");
 
 // Dividir por "/"
@@ -160,7 +160,7 @@ public class Controller {
         }
     }
 
-    public void copiarArchivo(String nombreCompleto, String dirDestino) {
+    public boolean copiarArchivo(String nombreCompleto, String dirDestino) {
         Archivo file = drive.getCurrent().getFile(nombreCompleto);
         Directory destino = drive.searchDir(dirDestino, drive.getRoot());
         if (file != null && destino != null) {
@@ -169,15 +169,83 @@ public class Controller {
                 destino.addFile(copia);
                 drive.useSpace(copia.getSize());
                 System.out.println("Archivo copiado a: " + destino.getPath());
+                return true;
             } else {
                 System.out.println("Ya existe un archivo con este nombre en el directorio seleccionado.");
+                return false;
             }
         } else {
             System.out.println("Archivo no encontrado o el directorio no existe.");
+            return false;
         }
     }
+    public boolean modCopiarArchivo(String nombreCompleto, String dirDestinoRuta) {
+   
+    Directory actual = drive.getCurrent();
+    Archivo file = actual.getFile(nombreCompleto);
+    
+        System.out.println(nombreCompleto);
+        System.out.println(dirDestinoRuta);
+        System.out.println(file);
+        System.out.println(actual.getName());
+    Directory destino = drive.modSearchDir(dirDestinoRuta, drive.getRoot());
 
-    public void mover(String nombre, String dirDestino) {
+    if (file != null && destino != null) {
+        // 3. Verificar si ya existe un archivo con ese nombre
+        if (destino.getFile(nombreCompleto) == null) {
+            Archivo copia = new Archivo(file.getName(), file.getExtension(), file.getContent());
+            destino.addFile(copia);
+            drive.useSpace(copia.getSize());
+
+            System.out.println("Archivo copiado a: " + destino.getPath());
+            return true;
+        } else {
+            System.out.println("Ya existe un archivo con este nombre en el directorio seleccionado.");
+            return false;
+        }
+    } else {
+        System.out.println("Archivo no encontrado o el directorio no existe.");
+        return false;
+    }
+}
+
+public boolean modMover(String nombre, String dirDestinoRuta) {
+    Directory current = drive.getCurrent(); // carpeta actual del usuario
+    Archivo file = current.getFile(nombre);
+
+    Directory destino = drive.modSearchDir(dirDestinoRuta, drive.getRoot());
+
+    if (destino == null) {
+        System.out.println("No se ha encontrado el directorio destino.");
+        return false;
+    }
+
+    if (file != null) {
+        current.getFiles().remove(file);
+        destino.addFile(file);
+        System.out.println("Archivo movido a: " + destino.getPath());
+        return true;
+    }
+
+    Directory dir = current.getSubdirectory(nombre);
+    if (dir != null) {
+        if (dir.isProtected()) {
+            System.out.println("No se puede mover una carpeta protegida.");
+            return false;
+        }
+
+        current.getSubdirectories().remove(dir);
+        dir.setParent(destino);
+        destino.addSubdirectory(dir);
+        System.out.println("Directorio movido a: " + destino.getPath());
+        return true;
+    }
+
+    System.out.println("No se ha encontrado un archivo o directorio con ese nombre.");
+    return false;
+}
+
+    public boolean mover(String nombre, String dirDestino) {
         Directory current = drive.getCurrent();
         Archivo file = current.getFile(nombre);
         Directory destino = drive.searchDir(dirDestino, drive.getRoot());
@@ -186,24 +254,26 @@ public class Controller {
                 current.getFiles().remove(file);
                 destino.addFile(file);
                 System.out.println("Archivo movido a: " + destino.getPath());
-                return;
+                return false;
             }
             Directory dir = current.getSubdirectory(nombre);
             if (dir != null) {
                 if (dir.isProtected()) {
                     System.out.println("No se puede mover una carpeta protegida.");
-                    return;
+                    return false;
                 }
                 current.getSubdirectories().remove(dir);
                 dir.setParent(destino);
                 destino.addSubdirectory(dir);
                 System.out.println("Directorio movido a: " + destino.getPath());
-                return;
+                return true;
             }
             System.out.println("No se ha encontrado un archivo o directorio con ese nombre.");
         } else {
             System.out.println("No se ha encontrado el directorio destino.");
+            return false;
         }
+        return false;
     }
 
     public void loadArchivo(String rutaLocal) {
@@ -317,24 +387,31 @@ public class Controller {
 
     public void compartir(String nombre, String receptorUsername) {
         Archivo file = drive.getCurrent().getFile(nombre);
+        Drive receptor = FS.cargarDrive(receptorUsername);
+        if (receptor == null) {
+            System.out.println("El usuario receptor no existe.");
+            return;
+        }
+        receptor.rebuildParents();
+        Directory shared = receptor.getRoot().getSubdirectory("shared");
         if (file != null) {
-            Drive receptor = FS.cargarDrive(receptorUsername);
-            if (receptor == null) {
-                System.out.println("El usuario receptor no existe.");
-                return;
-            }
-            receptor.rebuildParents();
-
-            Directory shared = receptor.getRoot().getSubdirectory("shared");
-
             Archivo copia = new Archivo(file.getName(), file.getExtension(), file.getContent());
             shared.addFile(copia);
-
             FS.guardarDrive(receptor);
             System.out.println("Archivo compartido con: " + receptorUsername);
-        } else {
-            System.out.println("Archivo no encontrado.");
+            return;
         }
+        Directory dirShare = drive.searchDir(nombre, drive.getRoot());
+        if (dirShare != null) {
+            Directory newDir = new Directory(dirShare.getName(), shared);
+            newDir.setFiles(dirShare.getFiles());
+            newDir.setSubdirectories(dirShare.getSubdirectories());
+            shared.addSubdirectory(newDir);
+            FS.guardarDrive(receptor);
+            System.out.println("Directorio compartido con: " + receptorUsername);
+            return;
+        }
+        System.out.println("No se ha encontrado el archivo o directorio.");
     }
     
       

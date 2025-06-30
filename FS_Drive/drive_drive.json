@@ -1,0 +1,87 @@
+{
+  "username": "drive",
+  "maxSizeBytes": 500,
+  "usedSpace": 4,
+  "root": {
+    "name": "root",
+    "subdirectories": [
+      {
+        "name": "shared",
+        "subdirectories": [
+          {
+            "name": "prueba",
+            "subdirectories": [
+              {
+                "name": "prueba",
+                "subdirectories": [],
+                "files": [],
+                "protectedDir": false
+              }
+            ],
+            "files": [
+              {
+                "name": "u",
+                "extension": "txt",
+                "content": "u",
+                "size": 1,
+                "creationDate": "2025-06-29 20:48:18",
+                "modificationDate": "2025-06-29 20:48:18"
+              }
+            ],
+            "protectedDir": false
+          }
+        ],
+        "files": [],
+        "protectedDir": true
+      }
+    ],
+    "files": [
+      {
+        "name": "prueba",
+        "extension": "txt",
+        "content": "2",
+        "size": 1,
+        "creationDate": "2025-06-29 20:45:40",
+        "modificationDate": "2025-06-29 20:45:40"
+      },
+      {
+        "name": "u",
+        "extension": "txt",
+        "content": "u",
+        "size": 1,
+        "creationDate": "2025-06-29 20:47:29",
+        "modificationDate": "2025-06-29 20:47:29"
+      }
+    ],
+    "protectedDir": true
+  },
+  "current": {
+    "name": "shared",
+    "subdirectories": [
+      {
+        "name": "prueba",
+        "subdirectories": [
+          {
+            "name": "prueba",
+            "subdirectories": [],
+            "files": [],
+            "protectedDir": false
+          }
+        ],
+        "files": [
+          {
+            "name": "u",
+            "extension": "txt",
+            "content": "u",
+            "size": 1,
+            "creationDate": "2025-06-29 20:48:18",
+            "modificationDate": "2025-06-29 20:48:18"
+          }
+        ],
+        "protectedDir": false
+      }
+    ],
+    "files": [],
+    "protectedDir": true
+  }
+}

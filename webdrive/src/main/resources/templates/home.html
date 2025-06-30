@@ -43,32 +43,237 @@
         <div class="path-bar">
             Ruta: <span th:text="${rutaActual}">/</span>
         </div>
+<!-- Acciones sobre elementos seleccionados -->
+<!-- Acciones sobre elementos seleccionados -->
+<div class="actions-bar">
+    <input type="text" id="Destino" placeholder="Destino" />
+    <button onclick="borrarSeleccionados()"><i class="fa fa-trash"></i> Borrar</button>
+    <button onclick="compartirSeleccionados()"><i class="fa fa-share-alt"></i> Compartir</button>
+    <button onclick="copiarSeleccionados()"><i class="fa fa-copy"></i> Copiar</button>
+    <button onclick="moverSeleccionados()"><i class="fa fa-arrows-alt"></i> Mover</button>
+</div>
+
+
 
         <!-- Sección de archivos actualizada -->
     <div class="grid">
-        <!-- Carpetas -->
-        <div th:each="carpeta : ${carpetas}" 
-             class="item folder" 
-             th:attr="data-carpeta=${carpeta.name}"
-             onclick="abrirCarpeta(this.getAttribute('data-carpeta'))">
-            <i class="fa fa-folder fa-3x"></i>
-            <div class="item-name" th:text="${carpeta.name}">Carpeta</div>
+       <!-- Carpetas -->
+<div th:each="carpeta : ${carpetas}" 
+     class="item folder" 
+     th:attr="data-carpeta=${carpeta.name}">
+    
+    <input type="checkbox" class="item-checkbox" th:attr="data-nombre=${carpeta.name}">
+    
+    <div onclick="abrirCarpeta(this.parentElement.getAttribute('data-carpeta'))">
+        <i class="fa fa-folder fa-3x"></i>
+        <div class="item-name" th:text="${carpeta.name}">Carpeta</div>
+    </div>
+</div>
+
+<!-- Archivos -->
+<div th:each="archivo : ${archivos}" 
+     class="item file" 
+     th:attr="data-archivo=${archivo.name + '.' + archivo.extension}">
+    
+    <input type="checkbox" class="item-checkbox" 
+           th:attr="data-nombre=${archivo.name + '.' + archivo.extension}">
+    
+    <div onclick="verArchivo(this.parentElement.getAttribute('data-archivo'))">
+        <i class="fa fa-file-alt fa-3x"></i>
+        <div class="item-name">
+            <span th:text="${archivo.name}"></span>.<span th:text="${archivo.extension}"></span>
         </div>
-        <!-- Archivos -->
-        <div th:each="archivo : ${archivos}" 
-            class="item file" 
-            th:attr="data-archivo=${archivo.name + '.' + archivo.extension}"
-            onclick="verArchivo(this.getAttribute('data-archivo'))">
-           <i class="fa fa-file-alt fa-3x"></i>
-           <div class="item-name">
-               <span th:text="${archivo.name}"></span>.<span th:text="${archivo.extension}"></span>
-           </div>
-        </div>
+    </div>
+</div>
+
     </div>
     </main>
 </div>
 
 <script>
+
+
+
+    // Variable global o obtenla de Thymeleaf (ejemplo):
+    // const rutaActual = /*[[${rutaActual}]]*/ '/root'; // si usas Thymeleaf, sino ponla en tu JS
+
+    function obtenerSeleccionados() {
+        const seleccionados = [];
+        document.querySelectorAll('.item-checkbox:checked').forEach(cb => {
+            seleccionados.push(cb.getAttribute('data-nombre'));
+        });
+        return seleccionados;
+    }
+function borrarSeleccionados() {
+    const seleccionados = obtenerSeleccionados();
+    if (seleccionados.length === 0) {
+        alert("Selecciona al menos un archivo o carpeta para borrar.");
+        return;
+    }
+
+    const archivos = [];
+    const carpetas = [];
+
+    seleccionados.forEach(nombre => {
+        if (nombre.includes('.')) { // asumimos archivo con extensión
+            archivos.push(nombre);
+        } else {
+            carpetas.push(nombre);
+        }
+    });
+
+    const data = {
+        archivos: archivos,
+        carpetas: carpetas
+    };
+
+    fetch('/borrar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(resp => resp.text())
+    .then(msg => {
+        alert("Respuesta del servidor: " + msg);
+        // Opcional: recargar la página o actualizar lista de archivos
+        window.location.reload();
+    })
+    .catch(err => {
+        alert("Error al borrar: " + err);
+    });
+}
+
+    function compartirSeleccionados() {
+        const usuarioDestino = document.getElementById('Destino').value.trim();
+        if (!usuarioDestino) {
+            alert("Debes indicar el usuario destino.");
+            return;
+        }
+
+        const seleccionados = obtenerSeleccionados();
+        if (seleccionados.length === 0) {
+            alert("Selecciona al menos un archivo o carpeta para compartir.");
+            return;
+        }
+
+        const archivos = [];
+        const carpetas = [];
+
+        // Aquí ajusta la lógica para diferenciar archivos y carpetas
+        seleccionados.forEach(nombre => {
+            if (nombre.includes('.')) { // Suponemos que los archivos tienen extensión
+                archivos.push(nombre);
+            } else {
+                carpetas.push(nombre);
+            }
+        });
+
+        // Prepara el JSON para enviar (no envíes rutaActual porque lo toma el backend de sesión)
+        const data = {
+            usuarioDestino: usuarioDestino,
+            archivos: archivos,
+            carpetas: carpetas
+        };
+
+        fetch('/compartir', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(resp => resp.text())
+        .then(msg => {
+            alert("Respuesta del servidor: " + msg);
+        })
+        .catch(err => {
+            alert("Error al compartir: " + err);
+        });
+    }
+function copiarSeleccionados() {
+    const rutaDestino = document.getElementById('Destino').value.trim();
+    if (!rutaDestino) {
+        alert("Debes indicar la ruta destino.");
+        return;
+    }
+
+    const seleccionados = obtenerSeleccionados();
+    if (seleccionados.length === 0) {
+        alert("Selecciona al menos un archivo o carpeta para copiar.");
+        return;
+    }
+
+    const archivos = [];
+    const carpetas = [];
+
+    seleccionados.forEach(nombre => {
+        if (nombre.includes('.')) {
+            archivos.push(nombre);
+        } else {
+            carpetas.push(nombre);
+        }
+    });
+
+    fetch('/copiar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            rutaDestino: rutaDestino,
+            archivos: archivos,
+            carpetas: carpetas
+        })
+    })
+    .then(resp => resp.text())
+    .then(msg => alert("Respuesta servidor: " + msg))
+    .catch(err => alert("Error al copiar: " + err));
+}
+function moverSeleccionados() {
+    const rutaDestino = document.getElementById('Destino').value.trim();
+    if (!rutaDestino) {
+        alert("Debes indicar la ruta destino.");
+        return;
+    }
+
+    const seleccionados = obtenerSeleccionados();
+    if (seleccionados.length === 0) {
+        alert("Selecciona al menos un archivo o carpeta para mover.");
+        return;
+    }
+
+    const archivos = [];
+    const carpetas = [];
+
+    seleccionados.forEach(nombre => {
+        if (nombre.includes('.')) {
+            archivos.push(nombre);
+        } else {
+            carpetas.push(nombre);
+        }
+    });
+
+    fetch('/mover', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            rutaDestino: rutaDestino,
+            archivos: archivos,
+            carpetas: carpetas
+        })
+    })
+    .then(resp => {
+        if (resp.ok) {
+            return resp.text();
+        } else {
+            return resp.text().then(err => { throw new Error(err); });
+        }
+    })
+    .then(msg => {
+        alert("Respuesta servidor: " + msg);
+        window.location.reload(); // ✅ Refresca la vista
+    })
+    .catch(err => alert("Error al mover: " + err.message));
+}
+
+
+
     function crearArchivo() {
         window.location.href = '/crear-archivo';
     }

@@ -23,7 +23,7 @@ public class Directory {
     public String getPath() {
         if (parent == null) return "/" + name;
         return parent.getPath() + "/" + name;
-    }
+    } 
 
     public void addFile(Archivo file) {
         files.add(file);

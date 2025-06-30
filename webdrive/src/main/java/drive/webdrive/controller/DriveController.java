@@ -380,7 +380,190 @@ public ResponseEntity<String> guardarArchivoJson(
     }
 }
 
-    
+
+@PostMapping("/compartir")
+public ResponseEntity<String> compartirElementos(
+    @RequestBody Map<String, Object> datos,  // soporta listas y strings
+    HttpSession session
+) {
+    String usuario = (String) session.getAttribute("usuario");
+    if (usuario == null) return ResponseEntity.status(401).body("No autenticado");
+
+    String rutaActual = (String) session.getAttribute("rutaActual");
+    if (rutaActual == null) rutaActual = "/root";
+
+    // Extraer listas de archivos y carpetas desde JSON recibido
+    List<String> archivos = (List<String>) datos.getOrDefault("archivos", List.of());
+    List<String> carpetas = (List<String>) datos.getOrDefault("carpetas", List.of());
+
+    // Extraer usuarioDestino
+    String usuarioDestino = (String) datos.get("usuarioDestino");
+    if (usuarioDestino == null || usuarioDestino.isBlank()) {
+        return ResponseEntity.badRequest().body("Falta el usuario destino para compartir");
+    }
+
+    try {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        // Construir JSON con usuario y rutaActual de la sesión
+        String jsonPayload = objectMapper.writeValueAsString(Map.of(
+            "usuario", usuario,
+            "rutaActual", rutaActual,
+            "usuarioDestino", usuarioDestino,
+            "archivos", archivos,
+            "carpetas", carpetas
+        ));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> request = new HttpEntity<>(jsonPayload, headers);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> response = restTemplate.postForEntity(
+            SERVER_URL + "/api/compartir",
+            request,
+            String.class
+        );
+
+        return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+
+    } catch (Exception e) {
+        return ResponseEntity.status(500).body("Error al compartir: " + e.getMessage());
+    }
+}
+
+@PostMapping("/borrar")
+public ResponseEntity<String> borrarElementos(
+    @RequestBody Map<String, Object> datos,
+    HttpSession session
+) {
+    String usuario = (String) session.getAttribute("usuario");
+    if (usuario == null) return ResponseEntity.status(401).body("No autenticado");
+
+    List<String> archivos = (List<String>) datos.getOrDefault("archivos", List.of());
+    List<String> carpetas = (List<String>) datos.getOrDefault("carpetas", List.of());
+
+    String rutaActual = (String) session.getAttribute("rutaActual");
+    if (rutaActual == null) rutaActual = "/root";
+
+    try {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        String jsonPayload = objectMapper.writeValueAsString(Map.of(
+            "usuario", usuario,
+            "rutaActual", rutaActual,
+            "archivos", archivos,
+            "carpetas", carpetas
+        ));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> request = new HttpEntity<>(jsonPayload, headers);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> response = restTemplate.postForEntity(
+            "http://localhost:3000/api/borrar",
+            request,
+            String.class
+        );
+
+        return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+
+    } catch (Exception e) {
+        return ResponseEntity.status(500).body("Error al borrar: " + e.getMessage());
+    }
+}
+@PostMapping("/copiar")
+public ResponseEntity<String> copiarElementos(
+    @RequestBody Map<String, Object> datos,
+    HttpSession session
+) {
+    String usuario = (String) session.getAttribute("usuario");
+    if (usuario == null) return ResponseEntity.status(401).body("No autenticado");
+
+    String rutaActual = (String) session.getAttribute("rutaActual");
+    if (rutaActual == null) rutaActual = "/root";
+
+    String rutaDestino = (String) datos.get("rutaDestino");
+    if (rutaDestino == null || rutaDestino.isBlank()) {
+        return ResponseEntity.badRequest().body("Falta la ruta destino");
+    }
+
+    List<String> archivos = (List<String>) datos.getOrDefault("archivos", List.of());
+    List<String> carpetas = (List<String>) datos.getOrDefault("carpetas", List.of());
+
+    try {
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonPayload = mapper.writeValueAsString(Map.of(
+            "usuario", usuario,
+            "rutaActual", rutaActual,
+            "rutaDestino", rutaDestino,
+            "archivos", archivos,
+            "carpetas", carpetas
+        ));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> request = new HttpEntity<>(jsonPayload, headers);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> response = restTemplate.postForEntity(
+            "http://localhost:3000/api/copiar",
+            request,
+            String.class
+        );
+
+        return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+    } catch (Exception e) {
+        return ResponseEntity.status(500).body("Error al copiar: " + e.getMessage());
+    }
+}
+
+@PostMapping("/mover")
+public ResponseEntity<String> moverElementos(
+    @RequestBody Map<String, Object> datos,
+    HttpSession session
+) {
+    String usuario = (String) session.getAttribute("usuario");
+    if (usuario == null) return ResponseEntity.status(401).body("No autenticado");
+
+    String rutaActual = (String) session.getAttribute("rutaActual");
+    if (rutaActual == null) rutaActual = "/root";
+
+    String rutaDestino = (String) datos.get("rutaDestino");
+    if (rutaDestino == null || rutaDestino.isBlank()) {
+        return ResponseEntity.badRequest().body("Falta la ruta destino");
+    }
+
+    List<String> archivos = (List<String>) datos.getOrDefault("archivos", List.of());
+    List<String> carpetas = (List<String>) datos.getOrDefault("carpetas", List.of());
+
+    try {
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonPayload = mapper.writeValueAsString(Map.of(
+            "usuario", usuario,
+            "rutaActual", rutaActual,
+            "rutaDestino", rutaDestino,
+            "archivos", archivos,
+            "carpetas", carpetas
+        ));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> request = new HttpEntity<>(jsonPayload, headers);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> response = restTemplate.postForEntity(
+            "http://localhost:3000/api/mover",
+            request,
+            String.class
+        );
+
+        return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+    } catch (Exception e) {
+        return ResponseEntity.status(500).body("Error al mover: " + e.getMessage());
+    }
+}
 }
 
 

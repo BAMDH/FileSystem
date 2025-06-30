@@ -1,6 +1,7 @@
 package modelo;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 /**
  *
@@ -108,4 +109,24 @@ public class Drive {
         }
         return null;
     }
+    public Directory modSearchDir(String ruta, Directory actual) {
+    if (ruta == null || ruta.isBlank()) return null;
+
+    // Elimina "/" inicial si existe, y divide la ruta
+    String[] partes = ruta.replaceFirst("^/", "").split("/");
+
+    Directory dir = actual;
+
+    for (String parte : partes) {
+        if (parte.equals("root")) continue; // ya estamos en root
+        Optional<Directory> sub = dir.getSubdirectories().stream()
+            .filter(d -> d.getName().equals(parte))
+            .findFirst();
+        if (sub.isEmpty()) return null;
+        dir = sub.get();
+    }
+
+    return dir;
+}
+
 }

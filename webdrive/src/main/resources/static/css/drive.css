@@ -108,3 +108,35 @@ body {
 .btn-back i {
     margin-right: 8px;
 }
+.item {
+    position: relative;
+    padding-left: 25px; /* espacio para checkbox */
+}
+
+.item-checkbox {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    z-index: 2;
+    transform: scale(1.2);
+    cursor: pointer;
+}
+.actions-bar {
+    margin: 10px 0;
+    display: flex;
+    gap: 10px;
+}
+
+.actions-bar button {
+    padding: 8px 12px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.actions-bar button:hover {
+    background-color: #0056b3;
+}

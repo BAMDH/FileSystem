@@ -1,7 +1,7 @@
 {
   "username": "admin",
-  "maxSizeBytes": 20,
-  "usedSpace": 35,
+  "maxSizeBytes": 10000,
+  "usedSpace": 28,
   "root": {
     "name": "root",
     "subdirectories": [

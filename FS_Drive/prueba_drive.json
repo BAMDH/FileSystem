@@ -1,39 +1,136 @@
 {
   "username": "prueba",
   "maxSizeBytes": 1,
-  "usedSpace": 1,
+  "usedSpace": -38,
   "root": {
     "name": "root",
     "subdirectories": [
       {
         "name": "shared",
-        "subdirectories": [],
-        "files": [],
+        "subdirectories": [
+          {
+            "name": "shared",
+            "subdirectories": [],
+            "files": [
+              {
+                "name": "a",
+                "extension": "txt",
+                "content": "s",
+                "size": 1,
+                "creationDate": "2025-06-29 21:07:28",
+                "modificationDate": "2025-06-29 21:07:28"
+              },
+              {
+                "name": "hola",
+                "extension": "txt",
+                "content": "prueba2 hola",
+                "size": 12,
+                "creationDate": "2025-06-29 19:41:09",
+                "modificationDate": "2025-06-29 19:41:09"
+              }
+            ],
+            "protectedDir": false
+          }
+        ],
+        "files": [
+          {
+            "name": "a",
+            "extension": "txt",
+            "content": "s",
+            "size": 1,
+            "creationDate": "2025-06-29 21:07:46",
+            "modificationDate": "2025-06-29 21:07:46"
+          }
+        ],
         "protectedDir": true
-      },
-      {
-        "name": "prueba",
-        "subdirectories": [],
-        "files": [],
-        "protectedDir": false
       }
     ],
-    "files": [
-      {
-        "name": "a",
-        "extension": "txt",
-        "content": "s",
-        "size": 1,
-        "creationDate": "2025-06-29 17:25:14",
-        "modificationDate": "2025-06-29 17:25:14"
-      }
-    ],
+    "files": [],
     "protectedDir": true
   },
   "current": {
-    "name": "prueba",
-    "subdirectories": [],
+    "name": "root",
+    "subdirectories": [
+      {
+        "name": "shared",
+        "subdirectories": [
+          {
+            "name": "shared",
+            "subdirectories": [],
+            "files": [
+              {
+                "name": "a",
+                "extension": "txt",
+                "content": "s",
+                "size": 1,
+                "creationDate": "2025-06-29 21:07:28",
+                "modificationDate": "2025-06-29 21:07:28"
+              },
+              {
+                "name": "hola",
+                "extension": "txt",
+                "content": "prueba2 hola",
+                "size": 12,
+                "creationDate": "2025-06-29 19:41:09",
+                "modificationDate": "2025-06-29 19:41:09"
+              }
+            ],
+            "protectedDir": false
+          }
+        ],
+        "files": [
+          {
+            "name": "a",
+            "extension": "txt",
+            "content": "s",
+            "size": 1,
+            "creationDate": "2025-06-29 21:07:46",
+            "modificationDate": "2025-06-29 21:07:46"
+          }
+        ],
+        "protectedDir": true
+      },
+      {
+        "name": "hol",
+        "subdirectories": [
+          {
+            "name": "shared",
+            "subdirectories": [],
+            "files": [
+              {
+                "name": "a",
+                "extension": "txt",
+                "content": "s",
+                "size": 1,
+                "creationDate": "2025-06-29 21:07:28",
+                "modificationDate": "2025-06-29 21:07:28"
+              },
+              {
+                "name": "hola",
+                "extension": "txt",
+                "content": "prueba2 hola",
+                "size": 12,
+                "creationDate": "2025-06-29 19:41:09",
+                "modificationDate": "2025-06-29 19:41:09"
+              }
+            ],
+            "protectedDir": false
+          }
+        ],
+        "files": [
+          {
+            "name": "a",
+            "extension": "txt",
+            "content": "s",
+            "size": 1,
+            "creationDate": "2025-06-29 21:07:46",
+            "modificationDate": "2025-06-29 21:07:46"
+          }
+        ],
+        "protectedDir": false
+      }
+    ],
     "files": [],
-    "protectedDir": false
+    "protectedDir": true
   }
 }
