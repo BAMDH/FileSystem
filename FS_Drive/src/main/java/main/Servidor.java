@@ -253,6 +253,159 @@ class HiloCliente extends Thread {
                 escribirRespuesta(salidaRaw, 200, "{\"mensaje\": \"Elementos compartidos correctamente\"}");
                 return;
             } else if (metodo.equals("POST") && ruta.equals("/api/crear-carpeta")) {
+                char[] buffer = new char[contentLength];
+                int leidos = 0;
+                while (leidos < contentLength) {
+                    int actual = entrada.read(buffer, leidos, contentLength - leidos);
+                    if (actual == -1) {
+                        break;
+                    }
+                    leidos += actual;
+                }
+                String body = new String(buffer, 0, leidos);
+                System.out.println("Cuerpo recibido para copiar: " + body);
+
+                JsonObject jsonBody = JsonParser.parseString(body).getAsJsonObject();
+                String usuario = jsonBody.get("usuario").getAsString();
+                String rutaDestino = jsonBody.get("rutaDestino").getAsString();
+                 String rutaActual = jsonBody.get("rutaActual").getAsString();
+
+                List<String> archivos = new ArrayList<>();
+                if (jsonBody.has("archivos")) {
+                    jsonBody.getAsJsonArray("archivos").forEach(el -> archivos.add(el.getAsString()));
+                }
+                List<String> carpetas = new ArrayList<>();
+                if (jsonBody.has("carpetas")) {
+                    jsonBody.getAsJsonArray("carpetas").forEach(el -> carpetas.add(el.getAsString()));
+                }
+
+                Drive drive = FS.cargarDrive(usuario);
+                if (drive == null) {
+                    escribirRespuesta(salidaRaw, 404, "{\"error\": \"Usuario no encontrado\"}");
+                    return;
+                }
+
+                Controller controller = new Controller(drive);
+                controller.buscarDirectorio(rutaActual);
+                boolean oh = false;
+                for (String archivo : archivos) {
+                    oh = controller.modCopiarArchivo(archivo, rutaDestino);
+                }
+                 for (String carpeta : carpetas) {
+                    oh = controller.modCopiarArchivo(carpeta, rutaDestino);
+                }
+                if (oh) {
+                    FS.guardarDrive(drive);
+                    escribirRespuesta(salidaRaw, 200, "{\"mensaje\": \"Elementos copiados correctamente\"}");
+                } else {
+                    escribirRespuesta(salidaRaw, 500, "{\"error\": \"Error al copiar los elementos\"}");
+                }
+                return;
+            }
+
+            if (metodo.equals("POST") && ruta.equals("/api/mover")) {
+                char[] buffer = new char[contentLength];
+                int leidos = 0;
+                while (leidos < contentLength) {
+                    int actual = entrada.read(buffer, leidos, contentLength - leidos);
+                    if (actual == -1) {
+                        break;
+                    }
+                    leidos += actual;
+                }
+                String body = new String(buffer, 0, leidos);
+                System.out.println("Cuerpo recibido para mover: " + body);
+
+                JsonObject jsonBody = JsonParser.parseString(body).getAsJsonObject();
+                String usuario = jsonBody.get("usuario").getAsString();
+                String rutaDestino = jsonBody.get("rutaDestino").getAsString();
+                String rutaActual = jsonBody.get("rutaActual").getAsString();
+
+                List<String> archivos = new ArrayList<>();
+                if (jsonBody.has("archivos")) {
+                    jsonBody.getAsJsonArray("archivos").forEach(el -> archivos.add(el.getAsString()));
+                }
+                List<String> carpetas = new ArrayList<>();
+                if (jsonBody.has("carpetas")) {
+                    jsonBody.getAsJsonArray("carpetas").forEach(el -> carpetas.add(el.getAsString()));
+                }
+
+                Drive drive = FS.cargarDrive(usuario);
+                if (drive == null) {
+                    escribirRespuesta(salidaRaw, 404, "{\"error\": \"Usuario no encontrado\"}");
+                    return;
+                }
+
+                Controller controller = new Controller(drive);
+                controller.buscarDirectorio(rutaActual);
+                boolean oh = false;
+                for (String archivo : archivos) {
+                    oh = controller.modMover(archivo, rutaDestino);
+                }
+                for (String carpeta : carpetas) {
+                    oh = controller.modMover(carpeta, rutaDestino);
+                }
+                if (oh) {
+                    FS.guardarDrive(drive);
+                    escribirRespuesta(salidaRaw, 200, "{\"mensaje\": \"Elementos movidos correctamente\"}");
+                } else {
+                    escribirRespuesta(salidaRaw, 500, "{\"error\": \"Error al mover los elementos\"}");
+                }
+                return;
+            } //*************************//
+            else if (metodo.equals("POST") && ruta.equals("/api/compartir")) {
+                char[] buffer = new char[contentLength];
+                int leidos = 0;
+                while (leidos < contentLength) {
+                    int actual = entrada.read(buffer, leidos, contentLength - leidos);
+                    if (actual == -1) {
+                        break;
+                    }
+                    leidos += actual;
+                }
+                String body = new String(buffer, 0, leidos);
+                System.out.println("Cuerpo recibido (compartir): " + body);
+
+                JsonObject jsonBody = JsonParser.parseString(body).getAsJsonObject();
+                String usuario = jsonBody.get("usuario").getAsString();
+                String rutaActual = jsonBody.get("rutaActual").getAsString();
+                String receptor = jsonBody.get("usuarioDestino").getAsString();
+
+                Drive drive = FS.cargarDrive(usuario);
+                if (drive == null) {
+                    escribirRespuesta(salidaRaw, 404, "{\"error\": \"Usuario no encontrado\"}");
+                    return;
+                }
+
+                Controller controller = new Controller(drive);
+                controller.buscarDirectorio(rutaActual); // cambia la ruta actual
+
+                // Archivos a compartir
+                if (jsonBody.has("archivos") && jsonBody.get("archivos").isJsonArray()) {
+                    for (var elemento : jsonBody.getAsJsonArray("archivos")) {
+                        String archivo = elemento.getAsString();
+                        // Aquí puedes hacer lo que signifique "compartir", por ahora solo imprimir
+                        System.out.println("Compartir archivo: " + archivo);
+                        controller.compartir(archivo, receptor); // ← método que tú implementas
+                    }
+                }
+
+                
+                // Carpetas a compartir
+                if (jsonBody.has("carpetas") && jsonBody.get("carpetas").isJsonArray()) {
+                    for (var elemento : jsonBody.getAsJsonArray("carpetas")) {
+                        String carpeta = elemento.getAsString();
+                        System.out.println("Compartir carpeta: " + carpeta);
+                        controller.compartir(carpeta,receptor); // ← método que tú implementas
+                    }
+                }
+                 
+                // Guardar cambios
+                FS.guardarDrive(drive);
+
+                escribirRespuesta(salidaRaw, 200, "{\"mensaje\": \"Elementos compartidos correctamente\"}");
+                return;
+            } else if (metodo.equals("POST") && ruta.equals("/api/crear-carpeta")) {
                 // Leer el cuerpo de la solicitud
                 char[] buffer = new char[contentLength];
                 int leidos = entrada.read(buffer, 0, contentLength);

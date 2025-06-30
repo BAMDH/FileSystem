@@ -6,38 +6,54 @@
     "name": "root",
     "subdirectories": [
       {
-        "name": "mi_nueva_carpeta",
+        "name": "shared",
         "subdirectories": [],
-        "files": [],
-        "protectedDir": false
-      },
-      {
-        "name": "mi_nueva_carpeta2",
-        "subdirectories": [],
-        "files": [],
-        "protectedDir": false
+        "files": [
+          {
+            "name": "hola2asda",
+            "extension": "txt",
+            "content": "esto es una preuba de multiples archivos",
+            "size": 40,
+            "creationDate": "2025-06-29 21:03:52",
+            "modificationDate": "2025-06-29 21:03:52"
+          }
+        ],
+        "protectedDir": true
       }
     ],
-    "files": [],
-    "protectedDir": false
+    "files": [
+      {
+        "name": "a",
+        "extension": "txt",
+        "content": "s",
+        "size": 1,
+        "creationDate": "2025-06-29 19:44:13",
+        "modificationDate": "2025-06-29 19:44:13"
+      },
+      {
+        "name": "hola2asda",
+        "extension": "txt",
+        "content": "esto es una preuba de multiples archivos",
+        "size": 40,
+        "creationDate": "2025-06-29 19:44:13",
+        "modificationDate": "2025-06-29 19:44:13"
+      }
+    ],
+    "protectedDir": true
   },
   "current": {
-    "name": "root",
-    "subdirectories": [
+    "name": "shared",
+    "subdirectories": [],
+    "files": [
       {
-        "name": "mi_nueva_carpeta",
-        "subdirectories": [],
-        "files": [],
-        "protectedDir": false
-      },
-      {
-        "name": "mi_nueva_carpeta2",
-        "subdirectories": [],
-        "files": [],
-        "protectedDir": false
+        "name": "hola2asda",
+        "extension": "txt",
+        "content": "esto es una preuba de multiples archivos",
+        "size": 40,
+        "creationDate": "2025-06-29 21:03:52",
+        "modificationDate": "2025-06-29 21:03:52"
       }
     ],
-    "files": [],
-    "protectedDir": false
+    "protectedDir": true
   }
 }
