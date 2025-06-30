@@ -1,7 +1,7 @@
 {
   "username": "admin",
   "maxSizeBytes": 10000,
-  "usedSpace": 37,
+  "usedSpace": 45,
   "root": {
     "name": "root",
     "subdirectories": [
@@ -80,6 +80,22 @@
             "size": 6,
             "creationDate": "2025-06-30 06:38:00",
             "modificationDate": "2025-06-30 06:38:00"
+          },
+          {
+            "name": "hola",
+            "extension": "txt",
+            "content": "fsd",
+            "size": 3,
+            "creationDate": "2025-06-30 06:39:00",
+            "modificationDate": "2025-06-30 06:39:00"
+          },
+          {
+            "name": "file",
+            "extension": "txt",
+            "content": "sdfsa",
+            "size": 5,
+            "creationDate": "2025-06-30 06:39:43",
+            "modificationDate": "2025-06-30 06:39:43"
           }
         ],
         "protectedDir": false
@@ -190,6 +206,22 @@
             "size": 6,
             "creationDate": "2025-06-30 06:38:00",
             "modificationDate": "2025-06-30 06:38:00"
+          },
+          {
+            "name": "hola",
+            "extension": "txt",
+            "content": "fsd",
+            "size": 3,
+            "creationDate": "2025-06-30 06:39:00",
+            "modificationDate": "2025-06-30 06:39:00"
+          },
+          {
+            "name": "file",
+            "extension": "txt",
+            "content": "sdfsa",
+            "size": 5,
+            "creationDate": "2025-06-30 06:39:43",
+            "modificationDate": "2025-06-30 06:39:43"
           }
         ],
         "protectedDir": false
