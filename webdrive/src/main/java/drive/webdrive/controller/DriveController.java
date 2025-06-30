@@ -611,23 +611,25 @@ public ResponseEntity<String> crearUsuario(
 }
 
 
-    @GetMapping("/crear-carpeta")
-    public String crearCarpeta(@RequestParam String carpeta,HttpSession session) {
-        System.out.println("get crear carpeta cleinte " );
-        String usuario = (String) session.getAttribute("usuario");
-        UsuarioData data = service.cargarUsuario(usuario);
-        System.out.println("ruta " + data.getRutaActual());
-        System.out.println("carpeta " + carpeta);
+  @GetMapping("/crear-carpeta")
+public String crearCarpeta(@RequestParam String carpeta, HttpSession session) {
+    System.out.println("get crear carpeta cliente");
 
-        
-        
-        service.enviarCrearDirectorio(data.getNombre(),carpeta,data.getRutaActual());
-       // service.crearDirectorio(data, "nuevaCarpeta");
-           // Redirigir a la vista actual del usuario
-        String rutaActual = data.getRutaActual();
-        return "redirect:/";
-      
-    }
+    String usuario = (String) session.getAttribute("usuario");
+  
+
+    // Obtener ruta actual de la sesión
+    String rutaActual = (String) session.getAttribute("rutaActual");
+    if (rutaActual == null) rutaActual = "/root";
+
+    System.out.println("ruta actual: " + rutaActual);
+    System.out.println("carpeta a crear: " + carpeta);
+
+    // Crear carpeta en ruta actual
+    service.enviarCrearDirectorio(usuario, carpeta, rutaActual);
+
+    return "redirect:/";
+}
 @PostMapping("/descargar")
 public ResponseEntity<String> descargarElementos(
     @RequestBody Map<String, Object> datos,

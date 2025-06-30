@@ -13,12 +13,56 @@
       },
       {
         "name": "nuevo",
-        "subdirectories": [],
+        "subdirectories": [
+          {
+            "name": "ejempo",
+            "subdirectories": [],
+            "files": [],
+            "protectedDir": false
+          },
+          {
+            "name": "eyuy",
+            "subdirectories": [],
+            "files": [],
+            "protectedDir": false
+          }
+        ],
         "files": [],
         "protectedDir": false
       },
       {
         "name": "mi_nueva_carpeta4",
+        "subdirectories": [
+          {
+            "name": "hola",
+            "subdirectories": [],
+            "files": [],
+            "protectedDir": false
+          }
+        ],
+        "files": [],
+        "protectedDir": false
+      },
+      {
+        "name": "otro",
+        "subdirectories": [],
+        "files": [],
+        "protectedDir": false
+      },
+      {
+        "name": "je",
+        "subdirectories": [],
+        "files": [],
+        "protectedDir": false
+      },
+      {
+        "name": "ejemplo2",
+        "subdirectories": [],
+        "files": [],
+        "protectedDir": false
+      },
+      {
+        "name": "jajw",
         "subdirectories": [],
         "files": [],
         "protectedDir": false
@@ -55,12 +99,56 @@
       },
       {
         "name": "nuevo",
-        "subdirectories": [],
+        "subdirectories": [
+          {
+            "name": "ejempo",
+            "subdirectories": [],
+            "files": [],
+            "protectedDir": false
+          },
+          {
+            "name": "eyuy",
+            "subdirectories": [],
+            "files": [],
+            "protectedDir": false
+          }
+        ],
         "files": [],
         "protectedDir": false
       },
       {
         "name": "mi_nueva_carpeta4",
+        "subdirectories": [
+          {
+            "name": "hola",
+            "subdirectories": [],
+            "files": [],
+            "protectedDir": false
+          }
+        ],
+        "files": [],
+        "protectedDir": false
+      },
+      {
+        "name": "otro",
+        "subdirectories": [],
+        "files": [],
+        "protectedDir": false
+      },
+      {
+        "name": "je",
+        "subdirectories": [],
+        "files": [],
+        "protectedDir": false
+      },
+      {
+        "name": "ejemplo2",
+        "subdirectories": [],
+        "files": [],
+        "protectedDir": false
+      },
+      {
+        "name": "jajw",
         "subdirectories": [],
         "files": [],
         "protectedDir": false
