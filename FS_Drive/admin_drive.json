@@ -1,7 +1,7 @@
 {
   "username": "admin",
   "maxSizeBytes": 10000,
-  "usedSpace": -12,
+  "usedSpace": -30,
   "root": {
     "name": "root",
     "subdirectories": [
@@ -16,10 +16,10 @@
       {
         "name": "hola2asda",
         "extension": "txt",
-        "content": "esto es una preuba de multiples archivos",
-        "size": 40,
+        "content": "esto es una preuba de ",
+        "size": 22,
         "creationDate": "2025-06-29 21:03:52",
-        "modificationDate": "2025-06-29 21:03:52"
+        "modificationDate": "2025-06-29 22:53:02"
       },
       {
         "name": "a",
@@ -33,9 +33,33 @@
     "protectedDir": true
   },
   "current": {
-    "name": "shared",
-    "subdirectories": [],
-    "files": [],
+    "name": "root",
+    "subdirectories": [
+      {
+        "name": "shared",
+        "subdirectories": [],
+        "files": [],
+        "protectedDir": true
+      }
+    ],
+    "files": [
+      {
+        "name": "hola2asda",
+        "extension": "txt",
+        "content": "esto es una preuba de ",
+        "size": 22,
+        "creationDate": "2025-06-29 21:03:52",
+        "modificationDate": "2025-06-29 22:53:02"
+      },
+      {
+        "name": "a",
+        "extension": "txt",
+        "content": "s",
+        "size": 1,
+        "creationDate": "2025-06-29 19:44:13",
+        "modificationDate": "2025-06-29 19:44:13"
+      }
+    ],
     "protectedDir": true
   }
 }

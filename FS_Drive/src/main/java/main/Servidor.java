@@ -96,11 +96,11 @@ class HiloCliente extends Thread {
                 escribirRespuesta(salidaRaw, 200, json);
                 return;
 
-            }  else if (metodo.equals("POST") && ruta.equals("/api/crear-carpeta")) {
-    // Leer el cuerpo de la solicitud
-             char[] buffer = new char[contentLength];
-             int leidos = entrada.read(buffer, 0, contentLength);
-             String body = new String(buffer, 0, leidos);
+            } else if (metodo.equals("POST") && ruta.equals("/api/crear-carpeta")) {
+                // Leer el cuerpo de la solicitud
+                char[] buffer = new char[contentLength];
+                int leidos = entrada.read(buffer, 0, contentLength);
+                String body = new String(buffer, 0, leidos);
             }
 
             // Dentro de la clase que maneja las peticiones HTTP en el servidor (por ejemplo, tu HiloCliente o controlador):
@@ -120,7 +120,7 @@ class HiloCliente extends Thread {
                 JsonObject jsonBody = JsonParser.parseString(body).getAsJsonObject();
                 String usuario = jsonBody.get("usuario").getAsString();
                 String rutaDestino = jsonBody.get("rutaDestino").getAsString();
-                 String rutaActual = jsonBody.get("rutaActual").getAsString();
+                String rutaActual = jsonBody.get("rutaActual").getAsString();
 
                 List<String> archivos = new ArrayList<>();
                 if (jsonBody.has("archivos")) {
@@ -143,7 +143,7 @@ class HiloCliente extends Thread {
                 for (String archivo : archivos) {
                     oh = controller.modCopiarArchivo(archivo, rutaDestino);
                 }
-                 for (String carpeta : carpetas) {
+                for (String carpeta : carpetas) {
                     oh = controller.modCopiarArchivo(carpeta, rutaDestino);
                 }
                 if (oh) {
@@ -204,6 +204,49 @@ class HiloCliente extends Thread {
                     escribirRespuesta(salidaRaw, 500, "{\"error\": \"Error al mover los elementos\"}");
                 }
                 return;
+            } else if (metodo.equals("POST") && ruta.equals("/api/descargar")) {
+                char[] buffer = new char[contentLength];
+                int leidos = 0;
+                while (leidos < contentLength) {
+                    int actual = entrada.read(buffer, leidos, contentLength - leidos);
+                    if (actual == -1) {
+                        break;
+                    }
+                    leidos += actual;
+                }
+
+                String body = new String(buffer, 0, leidos);
+                System.out.println("Cuerpo recibido para descargar: " + body);
+
+                JsonObject jsonBody = JsonParser.parseString(body).getAsJsonObject();
+                String usuario = jsonBody.get("usuario").getAsString();
+                String rutaDestino = jsonBody.get("rutaDestino").getAsString();
+                String rutaActual = jsonBody.get("rutaActual").getAsString();
+
+                List<String> archivos = new ArrayList<>();
+                if (jsonBody.has("archivos")) {
+                    jsonBody.getAsJsonArray("archivos").forEach(el -> archivos.add(el.getAsString()));
+                }
+
+                Drive drive = FS.cargarDrive(usuario);
+                if (drive == null) {
+                    escribirRespuesta(salidaRaw, 404, "{\"error\": \"Usuario no encontrado\"}");
+                    return;
+                }
+
+                Controller controller = new Controller(drive);
+                controller.buscarDirectorio(rutaActual);
+                boolean oh = false;
+                for (String archivo : archivos) {
+                    oh = controller.downloadArchivo(archivo, rutaDestino);
+                }
+                if (oh) {
+                    escribirRespuesta(salidaRaw, 200, "{\"mensaje\": \"Descarga solicitada exitosa\"}");
+                 } else {
+                    escribirRespuesta(salidaRaw, 500, "{\"error\": \"Error al descargar los elementos\"}");
+                }
+                // Aquí puedes aplicar lógica real de "descargar" si la defines, por ahora se responde exitosamente
+                return;
             } //*************************//
             else if (metodo.equals("POST") && ruta.equals("/api/compartir")) {
                 char[] buffer = new char[contentLength];
@@ -242,16 +285,15 @@ class HiloCliente extends Thread {
                     }
                 }
 
-                
                 // Carpetas a compartir
                 if (jsonBody.has("carpetas") && jsonBody.get("carpetas").isJsonArray()) {
                     for (var elemento : jsonBody.getAsJsonArray("carpetas")) {
                         String carpeta = elemento.getAsString();
                         System.out.println("Compartir carpeta: " + carpeta);
-                        controller.compartir(carpeta,receptor); // ← método que tú implementas
+                        controller.compartir(carpeta, receptor); // ← método que tú implementas
                     }
                 }
-                 
+
                 // Guardar cambios
                 FS.guardarDrive(drive);
 
@@ -263,34 +305,35 @@ class HiloCliente extends Thread {
                 String body = new String(buffer);
                 System.out.println("Cuerpo recibido: " + body);
 
-        try {
-              JsonObject jsonBody = JsonParser.parseString(body).getAsJsonObject();
-              String usuario = jsonBody.get("usuario").getAsString();
-              String nombreCarpeta = jsonBody.get("nombreCarpeta").getAsString();
-              String rutaDestino = jsonBody.get("rutaDestino").getAsString();
+                try {
+                    JsonObject jsonBody = JsonParser.parseString(body).getAsJsonObject();
+                    String usuario = jsonBody.get("usuario").getAsString();
+                    String nombreCarpeta = jsonBody.get("nombreCarpeta").getAsString();
+                    String rutaDestino = jsonBody.get("rutaDestino").getAsString();
 
-        // Cargar el drive (simplificado)
-        Drive drive = FS.cargarDrive(usuario);
-        if (drive == null) {
-            escribirRespuesta(salidaRaw, 404, "{\"error\":\"Usuario no encontrado\"}");
-            return;
-        }
+                    // Cargar el drive (simplificado)
+                    Drive drive = FS.cargarDrive(usuario);
+                    if (drive == null) {
+                        escribirRespuesta(salidaRaw, 404, "{\"error\":\"Usuario no encontrado\"}");
+                        return;
+                    }
 
-        // Crear la carpeta
-        boolean creada = createFolder(drive.getCurrent(), rutaDestino, nombreCarpeta);
+                    // Crear la carpeta
+                    boolean creada = createFolder(drive.getCurrent(), rutaDestino, nombreCarpeta);
 
-        if (creada) {
-            // Guardar cambios
-            FS.guardarDrive(drive);
-            
-            // Responder con éxito
-            escribirRespuesta(salidaRaw, 200, "{\"mensaje\":\"Carpeta creada exitosamente\"}");
-        } else {
-            escribirRespuesta(salidaRaw, 400, "{\"error\":\"No se pudo crear la carpeta\"}");
-        }
-    } catch (Exception e) {
-        escribirRespuesta(salidaRaw, 500, "{\"error\":\"Error interno del servidor\"}");
-    }}  else if (metodo.equals("POST") && ruta.equals("/api/borrar")) {
+                    if (creada) {
+                        // Guardar cambios
+                        FS.guardarDrive(drive);
+
+                        // Responder con éxito
+                        escribirRespuesta(salidaRaw, 200, "{\"mensaje\":\"Carpeta creada exitosamente\"}");
+                    } else {
+                        escribirRespuesta(salidaRaw, 400, "{\"error\":\"No se pudo crear la carpeta\"}");
+                    }
+                } catch (Exception e) {
+                    escribirRespuesta(salidaRaw, 500, "{\"error\":\"Error interno del servidor\"}");
+                }
+            } else if (metodo.equals("POST") && ruta.equals("/api/borrar")) {
                 char[] buffer = new char[contentLength];
                 int leidos = 0;
                 while (leidos < contentLength) {
@@ -384,6 +427,41 @@ class HiloCliente extends Thread {
                 FS.guardarDrive(drive);
 
                 escribirRespuesta(salidaRaw, 200, "{\"mensaje\": \"Archivo actualizado correctamente\"}");
+                return;
+            } else if (metodo.equals("POST") && ruta.equals("/api/registro")) {
+                char[] buffer = new char[contentLength];
+                int leidos = 0;
+                while (leidos < contentLength) {
+                    int actual = entrada.read(buffer, leidos, contentLength - leidos);
+                    if (actual == -1) {
+                        break;
+                    }
+                    leidos += actual;
+                }
+                String body = new String(buffer, 0, leidos);
+                System.out.println("Cuerpo recibido para crear drive: " + body);
+
+                try {
+                    JsonObject jsonBody = JsonParser.parseString(body).getAsJsonObject();
+
+                    String usuario = jsonBody.get("username").getAsString();
+                    int maxSizeMB = jsonBody.get("maxSizeBytes").getAsInt(); // valor por defecto
+
+                    // Verificar si el drive ya existe
+                    Drive existingDrive = FS.cargarDrive(usuario);
+                    if (existingDrive != null) {
+                        escribirRespuesta(salidaRaw, 400, "{\"error\": \"El drive ya existe para este usuario\"}");
+                        return;
+                    }
+
+                    // Crear nuevo Drive con usuario y tamaño máximo
+                    Drive nuevoDrive = new Drive(usuario, maxSizeMB);
+                    FS.guardarDrive(nuevoDrive);
+
+                    escribirRespuesta(salidaRaw, 200, "{\"mensaje\": \"Drive creado exitosamente\"}");
+                } catch (Exception e) {
+                    escribirRespuesta(salidaRaw, 500, "{\"error\": \"Error al crear el drive: " + e.getMessage() + "\"}");
+                }
                 return;
             }
 

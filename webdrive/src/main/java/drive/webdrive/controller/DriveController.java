@@ -568,40 +568,29 @@ public ResponseEntity<String> moverElementos(
 @GetMapping("/registro")
 public String mostrarRegistro() {
     return "registro"; // Asegúrate que exista registro.html en /templates
-}
-
-
-
-
-
-@PostMapping("/crear-usuario")
-public ResponseEntity<String> crearUsuarioJson(
+}@PostMapping("/crear-usuario")
+public ResponseEntity<String> crearUsuario(
     @RequestBody Map<String, Object> datos,
     HttpSession session
 ) {
-    // Opcional: si quieres usar usuario de sesión, aquí se obtiene
-    // String usuarioSesion = (String) session.getAttribute("usuario");
+    String usuarioSesion = (String) session.getAttribute("usuario");
+    if (usuarioSesion == null) {
+        return ResponseEntity.status(401).body("No autenticado");
+    }
+
+    // Extraer datos recibidos en el body JSON
+    String nombre = (String) datos.get("nombre");
+    Integer tamano = (Integer) datos.get("tamano");
+    if (nombre == null || tamano == null) {
+        return ResponseEntity.badRequest().body("Faltan parámetros obligatorios");
+    }
 
     try {
-        String nombre = (String) datos.get("nombre");
-        Integer tamano = null;
-        // Convierte Number a Integer por seguridad
-        Object tamanoObj = datos.get("tamano");
-        if (tamanoObj instanceof Integer) {
-            tamano = (Integer) tamanoObj;
-        } else if (tamanoObj instanceof Number) {
-            tamano = ((Number) tamanoObj).intValue();
-        }
-
-        if (nombre == null || nombre.isEmpty() || tamano == null || tamano < 1) {
-            return ResponseEntity.badRequest().body("Datos inválidos");
-        }
-
-        // Preparamos JSON para el backend
         ObjectMapper objectMapper = new ObjectMapper();
+
         String jsonPayload = objectMapper.writeValueAsString(Map.of(
             "username", nombre,
-            "maxSizeBytes", tamano * 1024 * 1024 // convertir MB a bytes si tu backend espera bytes
+            "maxSizeBytes", tamano
         ));
 
         HttpHeaders headers = new HttpHeaders();
@@ -610,15 +599,65 @@ public ResponseEntity<String> crearUsuarioJson(
 
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> response = restTemplate.postForEntity(
-            "http://localhost:3000/api/registro",  // URL del backend
+            "http://localhost:3000/api/registro",
+            request,
+            String.class
+        );
+
+        if (response.getStatusCode().is2xxSuccessful()) {
+            return ResponseEntity.ok("Usuario registrado con éxito");
+        } else {
+            return ResponseEntity.status(response.getStatusCode())
+                .body("Error al registrar usuario: " + response.getBody());
+        }
+
+    } catch (Exception e) {
+        return ResponseEntity.status(500).body("Error al conectar con el servidor: " + e.getMessage());
+    }
+}
+@PostMapping("/descargar")
+public ResponseEntity<String> descargarElementos(
+    @RequestBody Map<String, Object> datos,
+    HttpSession session
+) {
+    String usuario = (String) session.getAttribute("usuario");
+    if (usuario == null) return ResponseEntity.status(401).body("No autenticado");
+
+    String rutaActual = (String) session.getAttribute("rutaActual");
+    if (rutaActual == null) rutaActual = "/root";
+
+    String rutaDestino = (String) datos.get("rutaDestino");
+    if (rutaDestino == null || rutaDestino.isBlank()) {
+        return ResponseEntity.badRequest().body("Falta la ruta destino");
+    }
+
+    List<String> archivos = (List<String>) datos.getOrDefault("archivos", List.of());
+    List<String> carpetas = (List<String>) datos.getOrDefault("carpetas", List.of());
+
+    try {
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonPayload = mapper.writeValueAsString(Map.of(
+            "usuario", usuario,
+            "rutaActual", rutaActual,
+            "rutaDestino", rutaDestino,
+            "archivos", archivos,
+            "carpetas", carpetas
+        ));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> request = new HttpEntity<>(jsonPayload, headers);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> response = restTemplate.postForEntity(
+            "http://localhost:3000/api/descargar",
             request,
             String.class
         );
 
         return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
-
     } catch (Exception e) {
-        return ResponseEntity.status(500).body("Error al conectar con el servidor: " + e.getMessage());
+        return ResponseEntity.status(500).body("Error al descargar: " + e.getMessage());
     }
 }
 

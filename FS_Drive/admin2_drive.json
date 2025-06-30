@@ -1,0 +1,31 @@
+{
+  "username": "admin2",
+  "maxSizeBytes": 1048576,
+  "usedSpace": 0,
+  "root": {
+    "name": "root",
+    "subdirectories": [
+      {
+        "name": "shared",
+        "subdirectories": [],
+        "files": [],
+        "protectedDir": true
+      }
+    ],
+    "files": [],
+    "protectedDir": true
+  },
+  "current": {
+    "name": "root",
+    "subdirectories": [
+      {
+        "name": "shared",
+        "subdirectories": [],
+        "files": [],
+        "protectedDir": true
+      }
+    ],
+    "files": [],
+    "protectedDir": true
+  }
+}

@@ -45,6 +45,8 @@
     <button onclick="compartirSeleccionados()"><i class="fa fa-share-alt"></i> Compartir</button>
     <button onclick="copiarSeleccionados()"><i class="fa fa-copy"></i> Copiar</button>
     <button onclick="moverSeleccionados()"><i class="fa fa-arrows-alt"></i> Mover</button>
+    <button onclick="descargarSeleccionados()"><i class="fa fa-download"></i> Descargar</button>
+
 </div>
 
 
@@ -136,6 +138,54 @@ function borrarSeleccionados() {
         alert("Error al borrar: " + err);
     });
 }
+
+function descargarSeleccionados() {
+    const rutaDestino = document.getElementById('Destino').value.trim();
+    if (!rutaDestino) {
+        alert("Debes indicar la ruta destino.");
+        return;
+    }
+
+    const seleccionados = obtenerSeleccionados();
+    if (seleccionados.length === 0) {
+        alert("Selecciona al menos un archivo o carpeta para descargar.");
+        return;
+    }
+
+    const archivos = [];
+    const carpetas = [];
+
+    seleccionados.forEach(nombre => {
+        if (nombre.includes('.')) {
+            archivos.push(nombre);
+        } else {
+            carpetas.push(nombre);
+        }
+    });
+
+    const data = {
+        archivos: archivos,
+        carpetas: carpetas,
+        rutaDestino: rutaDestino
+    };
+
+    fetch('/descargar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(resp => resp.text())
+    .then(msg => {
+        alert("Respuesta del servidor: " + msg);
+        // Puedes recargar o actualizar si es necesario
+        // window.location.reload();
+    })
+    .catch(err => {
+        alert("Error al descargar: " + err.message);
+    });
+}
+
+
 
     function compartirSeleccionados() {
         const usuarioDestino = document.getElementById('Destino').value.trim();

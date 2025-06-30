@@ -313,16 +313,16 @@ public boolean modMover(String nombre, String dirDestinoRuta) {
         }
     }
 
-    public void downloadArchivo(String nombreCompleto, String rutaDestino) {
+    public boolean downloadArchivo(String nombreCompleto, String rutaDestino) {
         Archivo file = drive.getCurrent().getFile(nombreCompleto);
         if (file == null) {
             System.out.println("No se encontró el archivo: " + nombreCompleto);
-            return;
+            return false;
         }
 
         if (!file.getExtension().equalsIgnoreCase("txt")) {
             System.out.println("Solo se pueden descargar archivos .txt");
-            return;
+            return false;
         }
 
         File destino = new File(rutaDestino);
@@ -337,8 +337,10 @@ public boolean modMover(String nombre, String dirDestinoRuta) {
         try (FileWriter writer = new FileWriter(rutaFinal)) {
             writer.write(file.getContent());
             System.out.println("Archivo descargado en: " + rutaFinal);
+            return true;
         } catch (IOException e) {
             System.out.println("Error al guardar archivo: " + e.getMessage());
+            return false;
         }
     }
 
