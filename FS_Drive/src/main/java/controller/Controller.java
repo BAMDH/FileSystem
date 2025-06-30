@@ -336,5 +336,82 @@ public class Controller {
             System.out.println("Archivo no encontrado.");
         }
     }
+    
+      
+public static boolean createFolder(Directory currentDirectory, String path, String folderName) {
+    try {
+        // 1. Navegar al directorio destino
+        Directory targetDir = currentDirectory;
+        
+        if (path != null && !path.isEmpty()) {
+            String[] parts = path.split("/");
+            for (String part : parts) {
+                if (part.isEmpty()) continue;
+                
+                boolean found = false;
+                for (Directory subdir : targetDir.getSubdirectories()) {
+                    if (subdir.getName().equals(part)) {
+                        targetDir = subdir;
+                        found = true;
+                        break;
+                    }
+                }
+                
+                if (!found) {
+                    System.out.println("No se encontró el directorio: " + part);
+                    return false;
+                }
+            }
+        }
+
+        // 2. Verificar si ya existe
+        for (Directory dir : targetDir.getSubdirectories()) {
+            if (dir.getName().equals(folderName)) {
+                System.out.println("Ya existe una carpeta con ese nombre");
+                return false;
+            }
+        }
+
+        // 3. Crear la nueva carpeta
+        Directory newFolder = new Directory(folderName, targetDir);
+        targetDir.getSubdirectories().add(newFolder);
+        
+        System.out.println("Carpeta creada exitosamente en: " + targetDir.getPath() + "/" + folderName);
+        return true;
+        
+    } catch (Exception e) {
+        System.out.println("Error al crear carpeta: " + e.getMessage());
+        return false;
+    }
+}
+
+    public static Directory navigateToDirectory(Directory current, String path) {
+        if (path == null || path.isEmpty() || path.equals("/")) {
+            return current;
+        }
+
+        String[] parts = path.split("/");
+        Directory temp = current;
+
+        for (String part : parts) {
+            if (part.isEmpty()) continue;
+            
+            boolean found = false;
+            for (Directory dir : temp.getSubdirectories()) {
+                if (dir.getName().equals(part)) {
+                    temp = dir;
+                    found = true;
+                    break;
+                }
+            }
+            
+            if (!found) {
+                return null;
+            }
+        }
+        
+        return temp;
+    }
+    
 
 }

@@ -6,6 +6,7 @@ import java.net.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import static controller.Controller.createFolder;
 import modelo.Directory;
 import modelo.Drive;
 import modelo.UserData;
@@ -96,29 +97,40 @@ class HiloCliente extends Thread {
                 escribirRespuesta(salidaRaw, 200, json);
                 return;
 
-            } else if (metodo.equals("POST") && ruta.equals("/api/crear-carpeta")) {
-                char[] buffer = new char[contentLength];
-                entrada.read(buffer);
-                String body = new String(buffer);
-                System.out.println("Cuerpo recibido: " + body);
+            }  else if (metodo.equals("POST") && ruta.equals("/api/crear-carpeta")) {
+    // Leer el cuerpo de la solicitud
+             char[] buffer = new char[contentLength];
+             int leidos = entrada.read(buffer, 0, contentLength);
+             String body = new String(buffer, 0, leidos);
 
-                JsonObject jsonBody = JsonParser.parseString(body).getAsJsonObject();
-                String usuario = jsonBody.get("usuario").getAsString();
-                String nombre = jsonBody.get("nombre").getAsString();
+        try {
+              JsonObject jsonBody = JsonParser.parseString(body).getAsJsonObject();
+              String usuario = jsonBody.get("usuario").getAsString();
+              String nombreCarpeta = jsonBody.get("nombreCarpeta").getAsString();
+              String rutaDestino = jsonBody.get("rutaDestino").getAsString();
 
-                Drive drive = FS.cargarDrive(usuario);
-                if (drive == null) {
-                    escribirRespuesta(salidaRaw, 404, "{\"error\": \"Usuario no encontrado\"}");
-                    return;
-                }
+        // Cargar el drive (simplificado)
+        Drive drive = FS.cargarDrive(usuario);
+        if (drive == null) {
+            escribirRespuesta(salidaRaw, 404, "{\"error\":\"Usuario no encontrado\"}");
+            return;
+        }
 
-                Controller controller = new Controller(drive);
-                controller.crearDirectorio(nombre);
+        // Crear la carpeta
+        boolean creada = createFolder(drive.getCurrent(), rutaDestino, nombreCarpeta);
 
-                escribirRespuesta(salidaRaw, 200, "{\"mensaje\": \"Carpeta creada\"}");
-                return;
-
-            } else if (metodo.equals("POST") && ruta.equals("/api/guardar-archivo")) {
+        if (creada) {
+            // Guardar cambios
+            FS.guardarDrive(drive);
+            
+            // Responder con éxito
+            escribirRespuesta(salidaRaw, 200, "{\"mensaje\":\"Carpeta creada exitosamente\"}");
+        } else {
+            escribirRespuesta(salidaRaw, 400, "{\"error\":\"No se pudo crear la carpeta\"}");
+        }
+    } catch (Exception e) {
+        escribirRespuesta(salidaRaw, 500, "{\"error\":\"Error interno del servidor\"}");
+    }} else if (metodo.equals("POST") && ruta.equals("/api/guardar-archivo")) {
                 char[] buffer = new char[contentLength];
                 int leidos = 0;
                 while (leidos < contentLength) {
