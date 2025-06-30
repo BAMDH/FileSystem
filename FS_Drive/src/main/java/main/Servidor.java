@@ -96,11 +96,142 @@ class HiloCliente extends Thread {
                 escribirRespuesta(salidaRaw, 200, json);
                 return;
 
-            } else if (metodo.equals("POST") && ruta.equals("/api/crear-carpeta")) {
-                // Leer el cuerpo de la solicitud
+            }   else if (metodo.equals("POST") && ruta.equals("/api/crear-carpeta")) {
+    // Leer el cuerpo de la solicitud
+             char[] buffer = new char[contentLength];
+             int leidos = entrada.read(buffer, 0, contentLength);
+             String body = new String(buffer, 0, leidos);
+
+        try {
+              JsonObject jsonBody = JsonParser.parseString(body).getAsJsonObject();
+              String usuario = jsonBody.get("usuario").getAsString();
+              String nombreCarpeta = jsonBody.get("nombreCarpeta").getAsString();
+              String rutaDestino = jsonBody.get("rutaDestino").getAsString();
+
+        // Cargar el drive (simplificado)
+        Drive drive = FS.cargarDrive(usuario);
+        if (drive == null) {
+            escribirRespuesta(salidaRaw, 404, "{\"error\":\"Usuario no encontrado\"}");
+            return;
+        }
+
+        // Crear la carpeta
+        boolean creada = createFolder(drive.getCurrent(), rutaDestino, nombreCarpeta);
+
+        if (creada) {
+            // Guardar cambios
+            FS.guardarDrive(drive);
+            
+            // Responder con éxito
+            escribirRespuesta(salidaRaw, 200, "{\"mensaje\":\"Carpeta creada exitosamente\"}");
+        } else {
+            escribirRespuesta(salidaRaw, 400, "{\"error\":\"No se pudo crear la carpeta\"}");
+        }
+    } catch (Exception e) {
+        escribirRespuesta(salidaRaw, 500, "{\"error\":\"Error interno del servidor\"}");
+    }} 
+
+            // Dentro de la clase que maneja las peticiones HTTP en el servidor (por ejemplo, tu HiloCliente o controlador):
+            if (metodo.equals("POST") && ruta.equals("/api/copiar")) {
                 char[] buffer = new char[contentLength];
-                int leidos = entrada.read(buffer, 0, contentLength);
+                int leidos = 0;
+                while (leidos < contentLength) {
+                    int actual = entrada.read(buffer, leidos, contentLength - leidos);
+                    if (actual == -1) {
+                        break;
+                    }
+                    leidos += actual;
+                }
                 String body = new String(buffer, 0, leidos);
+                System.out.println("Cuerpo recibido para copiar: " + body);
+
+                JsonObject jsonBody = JsonParser.parseString(body).getAsJsonObject();
+                String usuario = jsonBody.get("usuario").getAsString();
+                String rutaDestino = jsonBody.get("rutaDestino").getAsString();
+                 String rutaActual = jsonBody.get("rutaActual").getAsString();
+
+                List<String> archivos = new ArrayList<>();
+                if (jsonBody.has("archivos")) {
+                    jsonBody.getAsJsonArray("archivos").forEach(el -> archivos.add(el.getAsString()));
+                }
+                List<String> carpetas = new ArrayList<>();
+                if (jsonBody.has("carpetas")) {
+                    jsonBody.getAsJsonArray("carpetas").forEach(el -> carpetas.add(el.getAsString()));
+                }
+
+                Drive drive = FS.cargarDrive(usuario);
+                if (drive == null) {
+                    escribirRespuesta(salidaRaw, 404, "{\"error\": \"Usuario no encontrado\"}");
+                    return;
+                }
+
+                Controller controller = new Controller(drive);
+                controller.buscarDirectorio(rutaActual);
+                boolean oh = false;
+                for (String archivo : archivos) {
+                    oh = controller.modCopiarArchivo(archivo, rutaDestino);
+                }
+                 for (String carpeta : carpetas) {
+                    oh = controller.modCopiarArchivo(carpeta, rutaDestino);
+                }
+                if (oh) {
+                    FS.guardarDrive(drive);
+                    escribirRespuesta(salidaRaw, 200, "{\"mensaje\": \"Elementos copiados correctamente\"}");
+                } else {
+                    escribirRespuesta(salidaRaw, 500, "{\"error\": \"Error al copiar los elementos\"}");
+                }
+                return;
+            }
+            // Dentro de la clase que maneja las peticiones HTTP en el servidor (por ejemplo, tu HiloCliente o controlador):
+            if (metodo.equals("POST") && ruta.equals("/api/copiar")) {
+                char[] buffer = new char[contentLength];
+                int leidos = 0;
+                while (leidos < contentLength) {
+                    int actual = entrada.read(buffer, leidos, contentLength - leidos);
+                    if (actual == -1) {
+                        break;
+                    }
+                    leidos += actual;
+                }
+                String body = new String(buffer, 0, leidos);
+                System.out.println("Cuerpo recibido para copiar: " + body);
+
+                JsonObject jsonBody = JsonParser.parseString(body).getAsJsonObject();
+                String usuario = jsonBody.get("usuario").getAsString();
+                String rutaDestino = jsonBody.get("rutaDestino").getAsString();
+                 String rutaActual = jsonBody.get("rutaActual").getAsString();
+
+                List<String> archivos = new ArrayList<>();
+                if (jsonBody.has("archivos")) {
+                    jsonBody.getAsJsonArray("archivos").forEach(el -> archivos.add(el.getAsString()));
+                }
+                List<String> carpetas = new ArrayList<>();
+                if (jsonBody.has("carpetas")) {
+                    jsonBody.getAsJsonArray("carpetas").forEach(el -> carpetas.add(el.getAsString()));
+                }
+
+                Drive drive = FS.cargarDrive(usuario);
+                if (drive == null) {
+                    escribirRespuesta(salidaRaw, 404, "{\"error\": \"Usuario no encontrado\"}");
+                    return;
+                }
+
+                Controller controller = new Controller(drive);
+                controller.buscarDirectorio(rutaActual);
+                boolean oh = false;
+                for (String archivo : archivos) {
+                    oh = controller.modCopiarArchivo(archivo, rutaDestino);
+                }
+                 for (String carpeta : carpetas) {
+                    oh = controller.modCopiarArchivo(carpeta, rutaDestino);
+                }
+                if (oh) {
+                    FS.guardarDrive(drive);
+                    escribirRespuesta(salidaRaw, 200, "{\"mensaje\": \"Elementos copiados correctamente\"}");
+                } else {
+                    escribirRespuesta(salidaRaw, 500, "{\"error\": \"Error al copiar los elementos\"}");
+                }
+                return;
             }
 
             // Dentro de la clase que maneja las peticiones HTTP en el servidor (por ejemplo, tu HiloCliente o controlador):

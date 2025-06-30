@@ -10,6 +10,18 @@
         "subdirectories": [],
         "files": [],
         "protectedDir": true
+      },
+      {
+        "name": "nuevo",
+        "subdirectories": [],
+        "files": [],
+        "protectedDir": false
+      },
+      {
+        "name": "mi_nueva_carpeta4",
+        "subdirectories": [],
+        "files": [],
+        "protectedDir": false
       }
     ],
     "files": [
@@ -40,6 +52,18 @@
         "subdirectories": [],
         "files": [],
         "protectedDir": true
+      },
+      {
+        "name": "nuevo",
+        "subdirectories": [],
+        "files": [],
+        "protectedDir": false
+      },
+      {
+        "name": "mi_nueva_carpeta4",
+        "subdirectories": [],
+        "files": [],
+        "protectedDir": false
       }
     ],
     "files": [

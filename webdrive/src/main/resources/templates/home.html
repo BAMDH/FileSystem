@@ -323,7 +323,8 @@ function moverSeleccionados() {
     }
 
     function crearDirectorio() {
-        window.location.href = '/crear-carpeta';
+        var folder=prompt("Carpeta nueva");
+        window.location.href = '/crear-carpeta?carpeta=' + encodeURIComponent(folder);
     }
 
     function subirArchivo() {

@@ -8,6 +8,7 @@ package drive.webdrive.Services;
  *
  * @author drayo
  */
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -21,6 +22,10 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 
@@ -53,18 +58,43 @@ public class DriveService {
         }
     }
 
-    /*public void crearDirectorio(UsuarioData user, String nombreDir) {
-        Directorio actual = user.getRaiz();
-        if (actual.buscarSubdirectorio(nombreDir) == null) {
-            actual.getSubdirectorios().add(new Directorio(nombreDir));
+   
+    
+    public boolean enviarCrearDirectorio(String usuario, String nombreCarpeta, String rutaActual) {
+    RestTemplate restTemplate = new RestTemplate();
 
-            // Enviar al servidor externo
-            RestTemplate restTemplate = new RestTemplate();
-            String url = SERVER_URL + "/api/crear-carpeta";
-            Map<String, String> body = new HashMap<>();
-            body.put("usuario", user.getNombre());
-            body.put("nombre", nombreDir);
-            restTemplate.postForObject(url, body, Void.class);
+    try {
+        String rutaDestino = normalizarRuta(rutaActual);
+        String url = SERVER_URL + "/api/crear-carpeta";
+
+        // 🔸 Convertir explícitamente a JSON
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonPayload = mapper.writeValueAsString(Map.of(
+            "usuario", usuario,
+            "nombreCarpeta", nombreCarpeta,
+            "rutaDestino", rutaDestino
+        ));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<String> request = new HttpEntity<>(jsonPayload, headers);
+
+        ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+        return response.getStatusCode().is2xxSuccessful();
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        return false;
+    }
+}
+
+    private String normalizarRuta(String ruta) {
+        // Eliminar /root si está al inicio
+        if (ruta.startsWith("/root")) {
+            return ruta.substring(5); // Elimina "/root"
         }
-    }*/
+        return ruta;
+    }
 }

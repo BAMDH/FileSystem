@@ -323,13 +323,7 @@ private Directorio buscarCarpetaPorRuta(Directorio raiz, String ruta) {
         return "redirect:/";
     }
 
-    @GetMapping("/crear-carpeta")
-    public String crearCarpeta(HttpSession session) {
-        String usuario = (String) session.getAttribute("usuario");
-        UsuarioData data = service.cargarUsuario(usuario);
-       // service.crearDirectorio(data, "nuevaCarpeta");
-        return "redirect:/";
-    }
+
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {
@@ -615,6 +609,25 @@ public ResponseEntity<String> crearUsuario(
         return ResponseEntity.status(500).body("Error al conectar con el servidor: " + e.getMessage());
     }
 }
+
+
+    @GetMapping("/crear-carpeta")
+    public String crearCarpeta(@RequestParam String carpeta,HttpSession session) {
+        System.out.println("get crear carpeta cleinte " );
+        String usuario = (String) session.getAttribute("usuario");
+        UsuarioData data = service.cargarUsuario(usuario);
+        System.out.println("ruta " + data.getRutaActual());
+        System.out.println("carpeta " + carpeta);
+
+        
+        
+        service.enviarCrearDirectorio(data.getNombre(),carpeta,data.getRutaActual());
+       // service.crearDirectorio(data, "nuevaCarpeta");
+           // Redirigir a la vista actual del usuario
+        String rutaActual = data.getRutaActual();
+        return "redirect:/";
+      
+    }
 @PostMapping("/descargar")
 public ResponseEntity<String> descargarElementos(
     @RequestBody Map<String, Object> datos,
