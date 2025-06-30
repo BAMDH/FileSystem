@@ -4,6 +4,8 @@ package controller;
  *
  * @author Psicops
  */
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.List;
@@ -493,6 +495,74 @@ public static boolean createFolder(Directory currentDirectory, String path, Stri
         
         return temp;
     }
+    
+     
+
+ public String createFileAndUpdateJson(Drive drive, String fileName, String extension, 
+                                    String content, String path, String jsonFilePath) {
+    try {
+        // 1. Crear el archivo en la estructura
+        String creationResult = createFile(drive, fileName, extension, content, path);
+        if (creationResult.startsWith("Error")) {
+            return creationResult;
+        }
+
+        // 2. Convertir el drive actualizado a JSON
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String updatedJson = gson.toJson(drive);
+
+        // 3. Guardar el JSON actualizado
+        try (FileWriter writer = new FileWriter(jsonFilePath)) {
+            writer.write(updatedJson);
+            return creationResult + " | JSON actualizado correctamente";
+        } catch (IOException e) {
+            return creationResult + " | Error al guardar el JSON: " + e.getMessage();
+        }
+
+    } catch (Exception e) {
+        return "Error general: " + e.getMessage();
+    }
+}
+
+
+private String createFile(Drive drive, String fileName, String extension, 
+                         String content, String path) {
+    try {
+        Directory targetDir;
+        if (path == null || path.isEmpty()) {
+            targetDir = drive.getCurrent();
+        } else {
+            targetDir = drive.modSearchDir(path, drive.getCurrent());
+            if (targetDir == null) {
+                return "Error: Directorio no encontrado - " + path;
+            }
+        }
+        
+        if (targetDir.isProtected()) {
+            return "Error: No tienes permisos para crear archivos en este directorio";
+        }
+        
+        String fullName = fileName + "." + extension;
+        if (targetDir.getFiles().stream().anyMatch(f -> f.getFullName().equals(fullName))) {
+            return "Error: Ya existe un archivo con ese nombre: " + fullName;
+        }
+        
+        long fileSize = content.getBytes().length;
+        if (!drive.hasEnoughSpace(fileSize)) {
+            return "Error: Espacio insuficiente en el drive";
+        }
+        
+        Archivo newFile = new Archivo(fileName, extension, content);
+        targetDir.addFile(newFile);
+        drive.useSpace(fileSize);
+        
+        return "Archivo creado exitosamente: " + fullName + " en " + targetDir.getPath();
+        
+    } catch (Exception e) {
+        return "Error al crear el archivo: " + e.getMessage();
+    }
+}
+
     
 
 }

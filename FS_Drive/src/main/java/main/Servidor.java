@@ -97,7 +97,7 @@ class HiloCliente extends Thread {
                 return;
 
             } else if (metodo.equals("POST") && ruta.equals("/api/crear-carpeta")) {
-                // Leer el cuerpo de la solicitud
+             
                 char[] buffer = new char[contentLength];
                 int leidos = entrada.read(buffer, 0, contentLength);
                 String body = new String(buffer, 0, leidos);
@@ -130,7 +130,54 @@ class HiloCliente extends Thread {
                 } catch (Exception e) {
                     escribirRespuesta(salidaRaw, 500, "{\"error\":\"Error interno del servidor\"}");
                 }
+            }  
+            //crear archivo 
+            else if (metodo.equals("POST") && ruta.equals("/api/crear-archivo")) {
+                  // Leer el cuerpo de la solicitud
+                     char[] buffer = new char[contentLength];
+                     int leidos = entrada.read(buffer, 0, contentLength);
+                     String body = new String(buffer, 0, leidos);
+    
+            try {
+              
+             JsonObject jsonBody = JsonParser.parseString(body).getAsJsonObject();
+             String usuario = jsonBody.get("usuario").getAsString();
+            String nombreArchivo = jsonBody.get("nombreArchivo").getAsString();
+            String extension = jsonBody.get("extension").getAsString();
+            String contenido = jsonBody.get("contenido").getAsString();
+            String rutaDestino = jsonBody.has("rutaDestino") ? jsonBody.get("rutaDestino").getAsString() : "";
+        
+      
+            Drive drive = FS.cargarDrive(usuario);
+            if (drive == null) {
+                escribirRespuesta(salidaRaw, 404, "{\"error\":\"Usuario no encontrado\"}");
+                return;
             }
+        
+            // Crear el controlador y crear el archivo
+            Controller controller = new Controller(drive);
+            String resultado = controller.createFileAndUpdateJson(
+                drive,
+                nombreArchivo,
+                extension,
+                contenido,
+                rutaDestino,
+                "ruta/del/json/" + usuario + ".json"  // Ajusta esta ruta según tu estructura
+            );
+        
+             // Verificar el resultado
+            if (resultado.contains("exitosamente")) {
+                 // Guardar los cambios en el drive
+                FS.guardarDrive(drive);
+            escribirRespuesta(salidaRaw, 200, "{\"mensaje\":\"Archivo creado exitosamente\"}");
+        } else {
+            escribirRespuesta(salidaRaw, 400, "{\"error\":\"" + resultado + "\"}");
+        }
+       } catch (Exception e) {
+        escribirRespuesta(salidaRaw, 500, "{\"error\":\"Error al procesar la solicitud: " + e.getMessage() + "\"}");
+       }
+        return;
+       }
 
             // Dentro de la clase que maneja las peticiones HTTP en el servidor (por ejemplo, tu HiloCliente o controlador):
             if (metodo.equals("POST") && ruta.equals("/api/copiar")) {
