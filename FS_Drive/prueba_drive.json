@@ -1,7 +1,7 @@
 {
   "username": "prueba",
   "maxSizeBytes": 1,
-  "usedSpace": -38,
+  "usedSpace": -31,
   "root": {
     "name": "root",
     "subdirectories": [
@@ -19,14 +19,6 @@
                 "size": 1,
                 "creationDate": "2025-06-29 21:07:28",
                 "modificationDate": "2025-06-29 21:07:28"
-              },
-              {
-                "name": "hola",
-                "extension": "txt",
-                "content": "prueba2 hola",
-                "size": 12,
-                "creationDate": "2025-06-29 19:41:09",
-                "modificationDate": "2025-06-29 19:41:09"
               }
             ],
             "protectedDir": false
@@ -40,6 +32,14 @@
             "size": 1,
             "creationDate": "2025-06-29 21:07:46",
             "modificationDate": "2025-06-29 21:07:46"
+          },
+          {
+            "name": "hola",
+            "extension": "txt",
+            "content": "prueba2 hola bubsar",
+            "size": 19,
+            "creationDate": "2025-06-29 19:41:09",
+            "modificationDate": "2025-06-29 21:44:11"
           }
         ],
         "protectedDir": true
@@ -49,88 +49,42 @@
     "protectedDir": true
   },
   "current": {
-    "name": "root",
+    "name": "shared",
     "subdirectories": [
       {
         "name": "shared",
-        "subdirectories": [
-          {
-            "name": "shared",
-            "subdirectories": [],
-            "files": [
-              {
-                "name": "a",
-                "extension": "txt",
-                "content": "s",
-                "size": 1,
-                "creationDate": "2025-06-29 21:07:28",
-                "modificationDate": "2025-06-29 21:07:28"
-              },
-              {
-                "name": "hola",
-                "extension": "txt",
-                "content": "prueba2 hola",
-                "size": 12,
-                "creationDate": "2025-06-29 19:41:09",
-                "modificationDate": "2025-06-29 19:41:09"
-              }
-            ],
-            "protectedDir": false
-          }
-        ],
+        "subdirectories": [],
         "files": [
           {
             "name": "a",
             "extension": "txt",
             "content": "s",
             "size": 1,
-            "creationDate": "2025-06-29 21:07:46",
-            "modificationDate": "2025-06-29 21:07:46"
-          }
-        ],
-        "protectedDir": true
-      },
-      {
-        "name": "hol",
-        "subdirectories": [
-          {
-            "name": "shared",
-            "subdirectories": [],
-            "files": [
-              {
-                "name": "a",
-                "extension": "txt",
-                "content": "s",
-                "size": 1,
-                "creationDate": "2025-06-29 21:07:28",
-                "modificationDate": "2025-06-29 21:07:28"
-              },
-              {
-                "name": "hola",
-                "extension": "txt",
-                "content": "prueba2 hola",
-                "size": 12,
-                "creationDate": "2025-06-29 19:41:09",
-                "modificationDate": "2025-06-29 19:41:09"
-              }
-            ],
-            "protectedDir": false
-          }
-        ],
-        "files": [
-          {
-            "name": "a",
-            "extension": "txt",
-            "content": "s",
-            "size": 1,
-            "creationDate": "2025-06-29 21:07:46",
-            "modificationDate": "2025-06-29 21:07:46"
+            "creationDate": "2025-06-29 21:07:28",
+            "modificationDate": "2025-06-29 21:07:28"
           }
         ],
         "protectedDir": false
       }
     ],
-    "files": [],
+    "files": [
+      {
+        "name": "a",
+        "extension": "txt",
+        "content": "s",
+        "size": 1,
+        "creationDate": "2025-06-29 21:07:46",
+        "modificationDate": "2025-06-29 21:07:46"
+      },
+      {
+        "name": "hola",
+        "extension": "txt",
+        "content": "prueba2 hola bubsar",
+        "size": 19,
+        "creationDate": "2025-06-29 19:41:09",
+        "modificationDate": "2025-06-29 21:44:11"
+      }
+    ],
     "protectedDir": true
   }
 }
